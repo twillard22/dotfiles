@@ -1,0 +1,11 @@
+[tools]
+bun = "latest"
+node = "latest"
+pnpm = "latest"
+ruby = "latest"
+yarn = "1.22.22"
+
+[settings]
+
+[settings.ruby]
+compile = false

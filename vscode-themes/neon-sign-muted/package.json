@@ -1,0 +1,18 @@
+{
+  "name": "tw-neon-sign-muted",
+  "displayName": "Neon Sign Muted",
+  "description": "Calmer sibling of Neon Sign — softer neons on plum background. Part of the twillard22 dotfiles theme system.",
+  "publisher": "twillard22",
+  "version": "1.0.0",
+  "engines": { "vscode": "^1.60.0" },
+  "categories": ["Themes"],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Neon Sign Muted",
+        "uiTheme": "vs-dark",
+        "path": "./themes/neon-sign-muted.json"
+      }
+    ]
+  }
+}

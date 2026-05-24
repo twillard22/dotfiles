@@ -1,0 +1,10 @@
+theme = neon-sign-muted
+font-family = FiraCode Nerd Font Mono
+font-size = 13
+
+window-padding-x = 8
+window-padding-y = 8
+
+macos-option-as-alt = true
+background-opacity = 0.95
+working-directory = /Users/trenton.willard/Development

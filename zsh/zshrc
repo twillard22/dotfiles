@@ -1,0 +1,86 @@
+# homebrew
+eval "$(/opt/homebrew/bin/brew shellenv zsh)"
+
+# mise
+eval "$(mise activate zsh)"
+
+# JVM
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+
+# Android
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+
+# Deskew a PDF (straightens crooked pages)
+# Uses --force-ocr to ensure deskew applies even on PDFs with existing text layers
+# --tesseract-timeout=0 skips actual OCR (fast, no new text added)
+deskewpdf() {
+    if [ $# -ne 2 ]; then
+        echo "Usage: deskewpdf input.pdf output.pdf"
+        echo "       (creates a new output file; use a different name to avoid overwriting the original)"
+        return 1
+    fi
+
+    local input="$1"
+    local output="$2"
+
+    if [ ! -f "$input" ]; then
+        echo "Error: Input file '$input' not found."
+        return 1
+    fi
+
+    echo "Deskewing '$input' → '$output'..."
+    echo "(This forces processing even if text exists; may rasterize pages slightly.)"
+
+    # Core command: force process + deskew + skip OCR
+    ocrmypdf --force-ocr --deskew --tesseract-timeout=0 --verbose 1 "$input" "$output"
+
+    if [ $? -eq 0 ]; then
+        echo "Success! Deskew complete → check '$output'."
+        echo "Tip: Compare side-by-side in Preview to confirm alignment."
+    else
+        echo "Failed — see errors above."
+        echo "Try: brew upgrade ocrmypdf  (if outdated)"
+        echo "Or add --clean or --rotate-pages if needed: e.g. --force-ocr --deskew --clean --tesseract-timeout=0"
+        return 1
+    fi
+}
+
+# history
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=50000
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt SHARE_HISTORY
+setopt HIST_REDUCE_BLANKS
+
+# fzf
+eval "$(fzf --zsh)"
+
+# modern cli tools
+alias ls='eza --icons'
+alias ll='eza --icons -la'
+alias cat='bat --paging=never'
+alias find='fd'
+alias grep='rg'
+eval "$(zoxide init zsh)"
+
+# claude
+export PATH="$HOME/.local/bin:$PATH"
+
+# theme switching
+alias theme-switch="$HOME/.dotfiles/theme-switch.sh"
+
+# theme colors (managed by ~/.dotfiles/theme-switch.sh)
+source "$HOME/.dotfiles/themes/active/zsh-autosuggest.zsh"
+source "$HOME/.dotfiles/themes/active/zsh-highlights.zsh"
+
+# zsh plugins
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# starship
+eval "$(starship init zsh)"

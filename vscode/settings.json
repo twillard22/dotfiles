@@ -1,0 +1,19 @@
+{
+  "workbench.startupEditor": "none",
+  "terminal.integrated.initialHint": false,
+  "terminal.integrated.fontFamily": "FiraCode Nerd Font Mono",
+  "editor.lineNumbers": "relative",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit",
+    "source.addMissingImports": "always",
+  },
+  "explorer.confirmDelete": false,
+  "chat.disableAIFeatures": true,
+  "js/ts.updateImportsOnFileMove.enabled": "always",
+  "js/ts.preferences.includePackageJsonAutoImports": "on",
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
+  "workbench.colorTheme": "Neon Sign Muted",
+}

@@ -1,0 +1,29 @@
+# Per-machine user identity (email + signingkey) lives in ~/.gitconfig.local,
+# which is NOT in this repo. See git/gitconfig.local.example for the template
+# and the README "Per-machine git identity" section for setup.
+[include]
+	path = ~/.gitconfig.local
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+[user]
+	name = Trenton Willard
+[commit]
+	gpgsign = true
+[tag]
+	gpgSign = true
+[core]
+	excludesFile = ~/.gitignore_global
+[push]
+	autoSetupRemote = true
+[pull]
+	rebase = true
+[init]
+	defaultBranch = main
+[alias]
+	lg = log --oneline --graph --decorate --all
+	undo = reset HEAD~1 --mixed
+	st = status -sb
+	aliases = config --get-regexp alias
