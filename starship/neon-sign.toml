@@ -1,0 +1,289 @@
+# Neon Sign — Starship config
+# Palette:
+#   bg_main      #0f0820   fg        #e0d4f5   fg_dim   #6b5a8a
+#   keyword      #ff3d8a   function  #5dff8f   type     #b266ff
+#   variable     #5ee2ff   string    #ffb547   number   #ff7a3d
+#   special      #ff5edb   error     #ff4d6d   warning  #ffb547
+#   info         #5ee2ff   success   #5dff8f
+
+[character]
+success_symbol = "[❯](#5dff8f)"
+error_symbol   = "[❯](#ff4d6d)"
+
+[directory]
+style           = "bold #5ee2ff"
+read_only       = " 󰌾"
+read_only_style = "#ff4d6d"
+
+[git_branch]
+symbol = " "
+style  = "bold #ff5edb"
+
+[git_commit]
+tag_symbol = '  '
+style      = "#b266ff"
+
+[git_status]
+style = "bold #ffb547"
+
+[git_state]
+style = "bold #ff7a3d"
+
+[cmd_duration]
+style = "#ffb547"
+
+[username]
+style_user = "bold #ff3d8a"
+style_root = "bold #ff4d6d"
+
+[hostname]
+ssh_symbol = " "
+style      = "bold #b266ff"
+
+[nodejs]
+symbol = " "
+style  = "#5dff8f"
+
+[python]
+symbol = " "
+style  = "#ffb547"
+
+[rust]
+symbol = "󱘗 "
+style  = "#ff7a3d"
+
+[golang]
+symbol = " "
+style  = "#5ee2ff"
+
+[package]
+symbol = "󰏗 "
+style  = "#ff5edb"
+
+[time]
+style = "#6b5a8a"
+
+[[battery.display]]
+threshold       = 100
+charging_symbol = "󰂄 "
+style           = "#5dff8f"
+
+[[battery.display]]
+threshold       = 30
+charging_symbol = "󰂄 "
+style           = "#ffb547"
+
+[[battery.display]]
+threshold       = 10
+charging_symbol = "󰂄 "
+style           = "bold #ff4d6d"
+
+# ─── Icon / symbol reference (verbatim from brief) ────────────────────────────
+
+[aws]
+symbol = " "
+[azure]
+symbol = " "
+[battery]
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂃 "
+unknown_symbol = "󰂑 "
+empty_symbol = "󰂎 "
+[buf]
+symbol = " "
+[bun]
+symbol = " "
+[c]
+symbol = " "
+[cpp]
+symbol = " "
+[cmake]
+symbol = " "
+[cobol]
+symbol = " "
+[conda]
+symbol = " "
+[container]
+symbol = " "
+[crystal]
+symbol = " "
+[dart]
+symbol = " "
+[deno]
+symbol = " "
+[direnv]
+symbol = " "
+[docker_context]
+symbol = " "
+[dotnet]
+symbol = " "
+[elixir]
+symbol = " "
+[elm]
+symbol = " "
+[erlang]
+symbol = " "
+[fennel]
+symbol = " "
+[fortran]
+symbol = " "
+[fossil_branch]
+symbol = " "
+[gcloud]
+symbol = "󱇶 "
+[gleam]
+symbol = " "
+[gradle]
+symbol = " "
+[guix_shell]
+symbol = " "
+[haskell]
+symbol = " "
+[haxe]
+symbol = " "
+[helm]
+symbol = " "
+[hg_branch]
+symbol = " "
+[java]
+symbol = " "
+[julia]
+symbol = " "
+[kotlin]
+symbol = " "
+[kubernetes]
+symbol = "󱃾 "
+[lua]
+symbol = " "
+[maven]
+symbol = " "
+[memory_usage]
+symbol = "󰍛 "
+[meson]
+symbol = "󰔷 "
+[mojo]
+symbol = "󰈸 "
+[nats]
+symbol = " "
+[netns]
+symbol = "󰛳 "
+[nim]
+symbol = " "
+[nix_shell]
+symbol = " "
+[ocaml]
+symbol = " "
+[odin]
+symbol = "󰟢 "
+[opa]
+symbol = " "
+[openstack]
+symbol = " "
+[os.symbols]
+AIX = " "
+AlmaLinux = " "
+Alpaquita = " "
+Alpine = " "
+ALTLinux = " "
+Amazon = " "
+Android = " "
+AOSC = " "
+Arch = " "
+Artix = " "
+Bluefin = " "
+CachyOS = " "
+CentOS = " "
+Debian = " "
+DragonFly = " "
+Elementary = " "
+Emscripten = " "
+EndeavourOS = " "
+Fedora = " "
+FreeBSD = " "
+Garuda = " "
+Gentoo = " "
+HardenedBSD = "󰞌 "
+Illumos = " "
+InstantOS = " "
+Ios = "󰀷 "
+Kali = " "
+Linux = " "
+Mabox = " "
+Macos = " "
+Manjaro = " "
+Mariner = " "
+MidnightBSD = " "
+Mint = " "
+NetBSD = " "
+NixOS = " "
+Nobara = " "
+OpenBSD = " "
+OpenCloudOS = " "
+openEuler = " "
+openSUSE = " "
+OracleLinux = "󰺡 "
+PikaOS = " "
+Pop = " "
+Raspbian = " "
+Redhat = "󱄛 "
+RedHatEnterprise = "󱄛 "
+Redox = "󰀘 "
+RockyLinux = " "
+Solus = " "
+SUSE = " "
+Ubuntu = " "
+Ultramarine = " "
+Unknown = " "
+Uos = " "
+Void = " "
+Windows = "󰍲 "
+Zorin = " "
+[perl]
+symbol = " "
+[php]
+symbol = " "
+[pijul_channel]
+symbol = " "
+[pixi]
+symbol = "󰏗 "
+[pulumi]
+symbol = " "
+[purescript]
+symbol = " "
+[raku]
+symbol = "󱖊 "
+[red]
+symbol = "󱍼 "
+[rlang]
+symbol = "󰟔 "
+[ruby]
+symbol = " "
+[scala]
+symbol = " "
+[shlvl]
+symbol = "󰹍 "
+[singularity]
+symbol = " "
+[solidity]
+symbol = " "
+[spack]
+symbol = " "
+[status]
+symbol = " "
+[sudo]
+symbol = " "
+[swift]
+symbol = " "
+[terraform]
+symbol = " "
+[vlang]
+symbol = " "
+[typst]
+symbol = " "
+[vagrant]
+symbol = " "
+[xmake]
+symbol = " "
+[zig]
+symbol = " "

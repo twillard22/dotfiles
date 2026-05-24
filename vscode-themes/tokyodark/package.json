@@ -1,0 +1,18 @@
+{
+  "name": "tw-tokyodark",
+  "displayName": "Tokyo Dark",
+  "description": "Tokyo Dark — a dark navy theme ported from tokyodark.nvim. Part of the twillard22 dotfiles theme system.",
+  "publisher": "twillard22",
+  "version": "1.0.0",
+  "engines": { "vscode": "^1.60.0" },
+  "categories": ["Themes"],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Tokyo Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/tokyodark.json"
+      }
+    ]
+  }
+}

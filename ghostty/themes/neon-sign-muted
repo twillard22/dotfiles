@@ -1,0 +1,27 @@
+# Neon Sign Muted — Ghostty theme
+
+background = #1e1830
+foreground = #d8cee8
+
+cursor-color = #d090c8
+cursor-text  = #1e1830
+
+selection-background = #3a2f55
+selection-foreground = #d8cee8
+
+palette = 0=#161025
+palette = 1=#e87a8a
+palette = 2=#8de0a5
+palette = 3=#e8c074
+palette = 4=#8fcde0
+palette = 5=#d090c8
+palette = 6=#b896d8
+palette = 7=#b8a8d0
+palette = 8=#4d4275
+palette = 9=#f08fa0
+palette = 10=#a8e8bc
+palette = 11=#f0cf90
+palette = 12=#a8d8e8
+palette = 13=#dca8d4
+palette = 14=#cab0e0
+palette = 15=#f0e8fa

@@ -1,0 +1,11 @@
+# Machine-local git identity. Copy this file to ~/.gitconfig.local and fill in
+# the values for this specific machine. The main gitconfig in this repo does
+# [include] path = ~/.gitconfig.local so these settings override/augment the
+# shared config.
+#
+# This file is NOT symlinked and is NOT committed to the dotfiles repo —
+# every machine has its own copy with its own GPG key.
+
+[user]
+	email = your-email@example.com
+	signingkey = YOUR_GPG_KEY_ID
