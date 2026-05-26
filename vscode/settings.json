@@ -16,4 +16,6 @@
   "js/ts.preferences.includePackageJsonAutoImports": "on",
   "js/ts.preferences.importModuleSpecifier": "non-relative",
   "workbench.colorTheme": "Neon Sign Muted",
+  "git.blame.editorDecoration.enabled": true,
+  "git.blame.statusBarItem.enabled": true,
 }
