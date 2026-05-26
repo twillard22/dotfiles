@@ -44,7 +44,7 @@ echo "==> Linking mise config..."
 mkdir -p "$HOME/.config/mise"
 symlink "$DOTFILES/mise/config.toml" "$HOME/.config/mise/config.toml"
 
-echo "==> Installing mise tools (node, bun, pnpm)..."
+echo "==> Installing mise tools (node, bun, pnpm, ruby, yarn)..."
 mise trust "$DOTFILES/mise/config.toml"
 mise install
 
@@ -127,9 +127,11 @@ open -a Raycast "$DOTFILES/raycast/settings.rayconfig" 2>/dev/null || echo "  Ra
 echo ""
 echo "Done. Manual steps remaining:"
 echo ""
-echo "  1. GPG key — import your private key on the new machine:"
-echo "       On old machine: gpg --export-secret-keys --armor DA68E2BA4C648D66 > key.asc"
-echo "       On new machine: gpg --import key.asc && gpg --trust-db && shred -u key.asc"
+echo "  1. GPG key — each machine has its own key. Generate a fresh one:"
+echo "       gpg --full-generate-key"
+echo "       Then add the key ID to ~/.gitconfig.local (see git/gitconfig.local.example)"
+echo "       Or import from another machine: gpg --export-secret-keys --armor KEY_ID > key.asc"
+echo "       then: gpg --import key.asc && shred -u key.asc"
 echo ""
 echo "  2. Claude Code plugins (run once inside Claude Code):"
 echo "       /plugin install supabase@claude-plugins-official"
