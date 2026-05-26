@@ -21,23 +21,15 @@ Personal dev environment — shell, git, mise, Homebrew packages, VSCode config,
     themes/              ← custom Ghostty theme files, each symlinked to ~/.config/ghostty/themes/
   starship/
     starship.toml        ← symlink → active theme (managed by theme-switch.sh)
-    catppuccin-mocha.toml
-    tokyodark.toml
+    neon-sign.toml
+    neon-sign-muted.toml
   vscode/
     settings.json        ← symlinked to ~/Library/Application Support/Code/User/settings.json
   vscode-themes/         ← custom VS Code theme extensions, each symlinked to ~/.vscode/extensions/
-    catppuccin-mocha/
-    tokyodark/
     neon-sign/           ← copied from github.com/twillard22/neon-sign (see note in Themes section)
     neon-sign-muted/
   themes/                ← zsh theme files, sourced at shell startup
     active/              ← symlink → active theme dir (managed by theme-switch.sh)
-    catppuccin-mocha/
-      zsh-highlights.zsh
-      zsh-autosuggest.zsh
-    tokyodark/
-      zsh-highlights.zsh
-      zsh-autosuggest.zsh
     neon-sign/
       zsh-highlights.zsh
       zsh-autosuggest.zsh
@@ -85,7 +77,7 @@ This will:
 - Symlink `.zshrc`, `.gitconfig`, `mise/config.toml`, `starship.toml`, `ghostty/config`, VSCode `settings.json`, and Claude config
 - Configure `~/.gnupg/gpg-agent.conf` to use `pinentry-mac`
 - Run `mise install` (node, bun, pnpm, ruby, yarn)
-- Install VSCode extensions (Catppuccin, ESLint, Prettier, Tokyo Night, VSCodeVim, Supermaven)
+- Install custom theme VSIXs (neon-sign, neon-sign-muted) and Marketplace extensions (ESLint, Prettier, Supermaven)
 
 ### 4. Per-machine git identity
 
@@ -170,8 +162,8 @@ and zsh-autosuggestions. All theme files live in `.dotfiles` — no third-party 
 ### Switching themes
 
 ```bash
-theme-switch tokyodark
-theme-switch catppuccin-mocha
+theme-switch neon-sign
+theme-switch neon-sign-muted
 ```
 
 ### neon-sign and neon-sign-muted

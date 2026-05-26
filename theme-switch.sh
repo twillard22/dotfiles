@@ -43,8 +43,6 @@ echo "  starship   →  starship/$THEME.toml"
 
 # Ghostty
 case "$THEME" in
-  catppuccin-mocha) GHOSTTY_THEME="catppuccin-mocha" ;;
-  tokyodark)        GHOSTTY_THEME="tokyo-dark" ;;
   neon-sign)        GHOSTTY_THEME="neon-sign" ;;
   neon-sign-muted)  GHOSTTY_THEME="neon-sign-muted" ;;
   *) echo "  WARNING: no Ghostty mapping for $THEME — skipping"; GHOSTTY_THEME="" ;;
@@ -56,8 +54,6 @@ fi
 
 # VS Code
 case "$THEME" in
-  catppuccin-mocha) VSCODE_THEME="Catppuccin Mocha" ;;
-  tokyodark)        VSCODE_THEME="Tokyo Dark" ;;
   neon-sign)        VSCODE_THEME="Neon Sign" ;;
   neon-sign-muted)  VSCODE_THEME="Neon Sign Muted" ;;
   *) echo "  WARNING: no VS Code mapping for $THEME — skipping"; VSCODE_THEME="" ;;

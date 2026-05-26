@@ -96,7 +96,7 @@ Full VS Code color theme. Match the structure of the existing themes exactly:
 - `tokenColors`: one entry per syntax concept with named `scope` arrays
 - `semanticTokenColors`: flat object with semantic token type keys
 
-Reference the catppuccin-mocha theme for the full list of required keys.
+Reference the neon-sign theme for the full list of required keys.
 
 ---
 

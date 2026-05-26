@@ -72,23 +72,18 @@ mkdir -p "$HOME/Library/Application Support/Code/User"
 symlink "$DOTFILES/vscode/settings.json" "$HOME/Library/Application Support/Code/User/settings.json"
 
 echo "==> Installing custom VSCode themes..."
-code --install-extension "$DOTFILES/vscode-themes/catppuccin-mocha/tw-catppuccin-mocha-1.0.0.vsix"
-code --install-extension "$DOTFILES/vscode-themes/tokyodark/tw-tokyodark-1.0.0.vsix"
 code --install-extension "$DOTFILES/vscode-themes/neon-sign/tw-neon-sign-1.0.0.vsix"
 code --install-extension "$DOTFILES/vscode-themes/neon-sign-muted/tw-neon-sign-muted-1.0.0.vsix"
 
 echo "==> Installing VSCode extensions..."
 code --install-extension dbaeumer.vscode-eslint
 code --install-extension esbenp.prettier-vscode
-code --install-extension vscodevim.vim
 code --install-extension supermaven.supermaven
 
 # ── Ghostty ───────────────────────────────────────────────────────────────────
 echo "==> Linking Ghostty config..."
 mkdir -p "$HOME/.config/ghostty/themes"
 symlink "$DOTFILES/ghostty/config" "$HOME/.config/ghostty/config"
-symlink "$DOTFILES/ghostty/themes/catppuccin-mocha" "$HOME/.config/ghostty/themes/catppuccin-mocha"
-symlink "$DOTFILES/ghostty/themes/tokyo-dark" "$HOME/.config/ghostty/themes/tokyo-dark"
 symlink "$DOTFILES/ghostty/themes/neon-sign" "$HOME/.config/ghostty/themes/neon-sign"
 symlink "$DOTFILES/ghostty/themes/neon-sign-muted" "$HOME/.config/ghostty/themes/neon-sign-muted"
 
@@ -115,8 +110,8 @@ echo "==> Setting up themes..."
 chmod +x "$DOTFILES/theme-switch.sh"
 # Create themes/active symlink if it doesn't exist
 if [ ! -e "$DOTFILES/themes/active" ]; then
-  ln -sf "$DOTFILES/themes/catppuccin-mocha" "$DOTFILES/themes/active"
-  echo "  themes/active → catppuccin-mocha (default)"
+  ln -sf "$DOTFILES/themes/neon-sign-muted" "$DOTFILES/themes/active"
+  echo "  themes/active → neon-sign-muted (default)"
 fi
 
 # ── Raycast ───────────────────────────────────────────────────────────────────
