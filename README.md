@@ -84,7 +84,7 @@ This will:
 - Run `git lfs install`
 - Symlink `.zshrc`, `.gitconfig`, `mise/config.toml`, `starship.toml`, `ghostty/config`, VSCode `settings.json`, and Claude config
 - Configure `~/.gnupg/gpg-agent.conf` to use `pinentry-mac`
-- Run `mise install` (node, bun, pnpm)
+- Run `mise install` (node, bun, pnpm, ruby, yarn)
 - Install VSCode extensions (Catppuccin, ESLint, Prettier, Tokyo Night, VSCodeVim, Supermaven)
 
 ### 4. Per-machine git identity
@@ -165,7 +165,7 @@ Run once inside Claude Code (can't be scripted):
 ## Themes
 
 Themes cover all five tools simultaneously: VS Code, Ghostty, Starship, zsh-syntax-highlighting,
-and zsh-autosuggestions. All theme files live in `dotfiles` — no third-party extensions required.
+and zsh-autosuggestions. All theme files live in `.dotfiles` — no third-party extensions required.
 
 ### Switching themes
 
