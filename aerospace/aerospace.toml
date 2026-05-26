@@ -68,6 +68,9 @@ alt-shift-2 = 'move-node-to-workspace 2'
 alt-shift-3 = 'move-node-to-workspace 3'
 alt-shift-4 = 'move-node-to-workspace 4'
 alt-shift-5 = 'move-node-to-workspace 5'
+alt-shift-v = 'move-node-to-workspace V'
+alt-shift-c = 'move-node-to-workspace C'
+alt-shift-g = 'move-node-to-workspace G'
 
 # Move window to next/prev monitor
 alt-shift-tab = 'move-node-to-monitor next'
