@@ -78,7 +78,6 @@ code --install-extension "$DOTFILES/vscode-themes/neon-sign-muted/tw-neon-sign-m
 echo "==> Installing VSCode extensions..."
 code --install-extension dbaeumer.vscode-eslint
 code --install-extension esbenp.prettier-vscode
-code --install-extension supermaven.supermaven
 
 # ── Ghostty ───────────────────────────────────────────────────────────────────
 echo "==> Linking Ghostty config..."
@@ -100,16 +99,10 @@ symlink "$DOTFILES/starship/starship.toml" "$HOME/.config/starship.toml"
 # ── Claude ────────────────────────────────────────────────────────────────────
 echo "==> Linking Claude config..."
 mkdir -p "$HOME/.claude/skills"
-mkdir -p "$HOME/.claude/themes"
 symlink "$DOTFILES/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-symlink "$DOTFILES/claude/settings.json" "$HOME/.claude/settings.json"
 
 # Invokable skills — add one line per skill in claude/skills/
 # symlink "$DOTFILES/claude/skills/tanstack-start-setup" "$HOME/.claude/skills/tanstack-start-setup"
-
-# Claude themes — add one line per theme in claude/themes/ once design-todo.md is resolved
-# symlink "$DOTFILES/claude/themes/neon-sign.json" "$HOME/.claude/themes/neon-sign.json"
-# symlink "$DOTFILES/claude/themes/neon-sign-muted.json" "$HOME/.claude/themes/neon-sign-muted.json"
 
 # ── Themes ────────────────────────────────────────────────────────────────────
 echo "==> Setting up themes..."
