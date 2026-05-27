@@ -39,12 +39,9 @@ Personal dev environment — shell, git, mise, Homebrew packages, VSCode config,
     NEW-THEME.md         ← template: paste into claude.ai to generate a new theme
   claude/
     CLAUDE.md            ← symlinked to ~/.claude/CLAUDE.md (global principles + @path includes)
-    settings.json        ← symlinked to ~/.claude/settings.json (theme, enabled plugins)
     guidelines/          ← always loaded every conversation via @path in CLAUDE.md
       karpathy/          ← submodule: github.com/multica-ai/andrej-karpathy-skills
     skills/              ← invokable skills, symlinked to ~/.claude/skills/ by setup.sh
-    themes/              ← custom Claude Code themes (see design-todo.md)
-  audit.md               ← one-time accuracy audit (symlinks, gitignore, submodules)
   design-todo.md         ← tasks requiring claude.ai design credits to complete
 ```
 
@@ -81,7 +78,7 @@ This will:
 - Symlink `.zshrc`, `.gitconfig`, `mise/config.toml`, `starship.toml`, `ghostty/config`, VSCode `settings.json`, and Claude config
 - Configure `~/.gnupg/gpg-agent.conf` to use `pinentry-mac`
 - Run `mise install` (node, bun, pnpm, ruby, yarn)
-- Install custom theme VSIXs (neon-sign, neon-sign-muted) and Marketplace extensions (ESLint, Prettier, Supermaven)
+- Install custom theme VSIXs (neon-sign, neon-sign-muted) and Marketplace extensions (ESLint, Prettier)
 
 ### 4. Per-machine git identity
 

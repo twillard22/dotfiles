@@ -63,16 +63,5 @@ if [ -n "$VSCODE_THEME" ]; then
   echo "  vscode     →  $VSCODE_THEME"
 fi
 
-# Claude Code
-case "$THEME" in
-  neon-sign)        CLAUDE_THEME="neon-sign" ;;
-  neon-sign-muted)  CLAUDE_THEME="neon-sign-muted" ;;
-  *) echo "  WARNING: no Claude theme mapping for $THEME — skipping"; CLAUDE_THEME="" ;;
-esac
-if [ -n "$CLAUDE_THEME" ]; then
-  sed -i '' "s|\"theme\": \".*\"|\"theme\": \"$CLAUDE_THEME\"|" "$DOTFILES/claude/settings.json"
-  echo "  claude     →  $CLAUDE_THEME"
-fi
-
 echo ""
 echo "Done. Open a new shell for zsh changes. Restart Ghostty for terminal changes."
