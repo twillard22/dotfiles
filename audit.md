@@ -11,12 +11,14 @@ Test every pattern with `git check-ignore` to confirm actual coverage.
 | Pattern | Covers | Gap |
 |---------|--------|-----|
 | `.DS_Store` | `.DS_Store` everywhere in the tree ✓ | — |
-| `*.local` | `foo.local`, `gitconfig.local` ✓ | Does **not** cover `settings.local.json` (ends in `.json`) |
+| `*.local` | `foo.local`, `gitconfig.local` ✓ | `settings.local.json` not covered, but Claude Code writes it to `~/.claude/` not `~/.dotfiles/claude/` — no real gap |
 | `.env` | `.env` ✓ | — |
 | `.env.*` | `.env.local`, `.env.production` ✓ | — |
 | `*.secret` | `foo.secret` ✓ | — |
 
-**Fix:** Add `claude/settings.local.json` explicitly. The `*.local` wildcard is not sufficient.
+**Status:** All patterns correct. `claude/settings.local.json` was added then removed after
+cross-referencing with symlinks — Claude Code writes that file to `~/.claude/` (the config dir),
+not alongside the resolved symlink target in `~/.dotfiles/claude/`.
 
 ---
 
