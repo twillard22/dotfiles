@@ -3,3 +3,6 @@
 .env
 .env.*
 *.secret
+
+# *.local doesn't cover .local.json extension
+claude/settings.local.json
