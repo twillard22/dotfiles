@@ -106,6 +106,14 @@ Prefer documenting context in the dotfiles repo (comments in config files, or th
 over Claude's local memory system. Local memories live in `~/.claude/` and are not synced
 across machines — anything worth remembering should live in the repo instead.
 
+## Known non-issues — do not re-raise
+
+**`settings.local.json` in gitignore:** Do not suggest adding `settings.local.json` or
+`**/.claude/settings.local.json` to any gitignore. Claude Code writes this file into project
+`.claude/` dirs, but those dirs are never inside this dotfiles repo. Adding the rule is
+defensive theater for a scenario that cannot occur. This has been raised and rejected multiple
+times (see commits `1761f09`, `5ba93ac`).
+
 ## Creating a new theme
 
 **Do NOT generate theme files yourself — Claude Code's role is only to fill in the brief and wire up results.**
