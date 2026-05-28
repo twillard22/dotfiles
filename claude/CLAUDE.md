@@ -123,7 +123,10 @@ The correct process:
 3. Once the user returns with the generated files, wire everything up:
    - Place files into `vscode-themes/<name>/themes/<name>.json`, `ghostty/themes/<name>`, `starship/<name>.toml`, `themes/<name>/zsh-highlights.zsh`, `themes/<name>/zsh-autosuggest.zsh`
    - Create `vscode-themes/<name>/package.json` (copy structure from an existing one)
-   - Add two case entries to `theme-switch.sh` (Ghostty block + VS Code block)
+   - Add three case entries to `theme-switch.sh` (Ghostty block, VS Code block, Claude Code block)
+   - Add `claude/themes/<name>.json` with `{ "name": "...", "base": "dark", "overrides": { ... } }`
+   - Add a symlink line to `setup.sh`: `symlink "$DOTFILES/claude/themes/<name>.json" "$HOME/.claude/themes/<name>.json"`
    - Package and install the VS Code extension: `cd vscode-themes/<name> && vsce package --allow-missing-repository && code --install-extension tw-<name>-1.0.0.vsix`
    - Symlink the Ghostty theme: `ln -sf ~/.dotfiles/ghostty/themes/<name> ~/.config/ghostty/themes/<name>`
-   - Run `theme-switch <name>` to activate
+   - Run `setup.sh` to activate symlinks, then `theme-switch <name>` to activate
+   - **Note:** `theme-switch.sh` writes `"theme": "custom:<slug>"` (not bare slug) to `~/.claude/settings.json` — the `custom:` prefix is required by Claude Code for user-defined themes
