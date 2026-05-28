@@ -3,3 +3,4 @@
 .env
 .env.*
 *.secret
+.claude/settings.local.json
