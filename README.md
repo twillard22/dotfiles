@@ -42,6 +42,7 @@ Personal dev environment — shell, git, mise, Homebrew packages, VSCode config,
     guidelines/          ← always loaded every conversation via @path in CLAUDE.md
       karpathy/          ← submodule: github.com/multica-ai/andrej-karpathy-skills
     skills/              ← invokable skills, symlinked to ~/.claude/skills/ by setup.sh
+    themes/              ← Claude Code theme JSONs, symlinked to ~/.claude/themes/ by setup.sh
   design-todo.md         ← tasks requiring claude.ai design credits to complete
 ```
 
@@ -157,8 +158,8 @@ Run once inside Claude Code (can't be scripted):
 
 ## Themes
 
-Themes cover all five tools simultaneously: VS Code, Ghostty, Starship, zsh-syntax-highlighting,
-and zsh-autosuggestions. All theme files live in `.dotfiles` — no third-party extensions required.
+Themes cover all six tools simultaneously: VS Code, Ghostty, Starship, zsh-syntax-highlighting,
+zsh-autosuggestions, and Claude Code. All theme files live in `.dotfiles` — no third-party extensions required.
 
 ### Switching themes
 
@@ -189,6 +190,8 @@ cp ~/Development/neon-sign/zsh/neon-sign-muted-highlights.zsh ~/.dotfiles/themes
 cp ~/Development/neon-sign/zsh/neon-sign-muted-autosuggest.zsh ~/.dotfiles/themes/neon-sign-muted/zsh-autosuggest.zsh
 cp ~/Development/neon-sign/themes/neon-sign.json ~/.dotfiles/vscode-themes/neon-sign/themes/
 cp ~/Development/neon-sign/themes/neon-sign-muted.json ~/.dotfiles/vscode-themes/neon-sign-muted/themes/
+cp ~/Development/neon-sign/claude/neon-sign.json ~/.dotfiles/claude/themes/neon-sign.json
+cp ~/Development/neon-sign/claude/neon-sign-muted.json ~/.dotfiles/claude/themes/neon-sign-muted.json
 # Then rebuild VSIXs and commit
 ```
 
@@ -226,8 +229,9 @@ code --install-extension tw-<name>-1.0.0.vsix
 
 ### How it works
 
-- **theme-switch.sh** updates four things atomically: `themes/active` symlink (zsh),
-  `starship/starship.toml` symlink, `ghostty/config` theme line, `vscode/settings.json` colorTheme
+- **theme-switch.sh** updates five things atomically: `themes/active` symlink (zsh),
+  `starship/starship.toml` symlink, `ghostty/config` theme line, `vscode/settings.json` colorTheme,
+  and `~/.claude/settings.json` theme (written as `custom:<slug>`)
 - **zshrc** sources `themes/active/zsh-autosuggest.zsh` and `themes/active/zsh-highlights.zsh`
   before the plugin sources, so the active theme's colors are always loaded
 - **Ghostty** reads `~/.config/ghostty/themes/<name>`, which is symlinked from `ghostty/themes/<name>`
