@@ -72,7 +72,7 @@ esac
 if [ -n "$CLAUDE_THEME" ]; then
   CLAUDE_SETTINGS="$HOME/.claude/settings.json"
   if [ -f "$CLAUDE_SETTINGS" ]; then
-    sed -i '' "s|\"theme\": \".*\"|\"theme\": \"$CLAUDE_THEME\"|" "$CLAUDE_SETTINGS"
+    sed -i '' "s|\"theme\": \".*\"|\"theme\": \"custom:$CLAUDE_THEME\"|" "$CLAUDE_SETTINGS"
     echo "  claude     →  $CLAUDE_THEME"
   else
     echo "  WARNING: ~/.claude/settings.json not found — skipping Claude theme"
