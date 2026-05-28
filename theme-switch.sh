@@ -33,12 +33,12 @@ fi
 
 # zsh theme files
 rm -f "$DOTFILES/themes/active"
-ln -sf "$DOTFILES/themes/$THEME" "$DOTFILES/themes/active"
+ln -sf "$THEME" "$DOTFILES/themes/active"
 echo "  zsh theme  →  themes/$THEME"
 
 # Starship
 rm -f "$DOTFILES/starship/starship.toml"
-ln -sf "$DOTFILES/starship/$THEME.toml" "$DOTFILES/starship/starship.toml"
+ln -sf "$THEME.toml" "$DOTFILES/starship/starship.toml"
 echo "  starship   →  starship/$THEME.toml"
 
 # Ghostty
