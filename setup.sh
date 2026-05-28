@@ -99,7 +99,10 @@ symlink "$DOTFILES/starship/starship.toml" "$HOME/.config/starship.toml"
 # ── Claude ────────────────────────────────────────────────────────────────────
 echo "==> Linking Claude config..."
 mkdir -p "$HOME/.claude/skills"
+mkdir -p "$HOME/.claude/themes"
 symlink "$DOTFILES/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+symlink "$DOTFILES/claude/themes/neon-sign.json" "$HOME/.claude/themes/neon-sign.json"
+symlink "$DOTFILES/claude/themes/neon-sign-muted.json" "$HOME/.claude/themes/neon-sign-muted.json"
 
 # Invokable skills — add one line per skill in claude/skills/
 # symlink "$DOTFILES/claude/skills/tanstack-start-setup" "$HOME/.claude/skills/tanstack-start-setup"
