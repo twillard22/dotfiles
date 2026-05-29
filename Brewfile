@@ -22,9 +22,11 @@ brew "tmux"
 brew "watchman"
 
 tap "nikitabobko/tap"
+tap "FelixKratz/formulae"
 
 # Casks
 cask "nikitabobko/tap/aerospace"
+brew "FelixKratz/formulae/borders"
 cask "docker-desktop"
 cask "raycast"
 cask "font-fira-code-nerd-font"

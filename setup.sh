@@ -91,6 +91,15 @@ echo "==> Linking Aerospace config..."
 mkdir -p "$HOME/.config/aerospace"
 symlink "$DOTFILES/aerospace/aerospace.toml" "$HOME/.config/aerospace/aerospace.toml"
 
+# ── Borders ───────────────────────────────────────────────────────────────────
+echo "==> Linking Borders config..."
+mkdir -p "$HOME/.config/borders"
+if [ ! -e "$DOTFILES/borders/active" ]; then
+  ln -sf "neon-sign-muted" "$DOTFILES/borders/active"
+  echo "  borders/active → neon-sign-muted (default)"
+fi
+symlink "$DOTFILES/borders/active" "$HOME/.config/borders/bordersrc"
+
 # ── Starship ──────────────────────────────────────────────────────────────────
 echo "==> Linking Starship config..."
 mkdir -p "$HOME/.config"
