@@ -79,5 +79,19 @@ if [ -n "$CLAUDE_THEME" ]; then
   fi
 fi
 
+# Borders
+case "$THEME" in
+  neon-sign)        BORDERS_THEME="neon-sign" ;;
+  neon-sign-muted)  BORDERS_THEME="neon-sign-muted" ;;
+  *) echo "  WARNING: no borders mapping for $THEME — skipping"; BORDERS_THEME="" ;;
+esac
+if [ -n "$BORDERS_THEME" ]; then
+  rm -f "$DOTFILES/borders/active"
+  ln -sf "$BORDERS_THEME" "$DOTFILES/borders/active"
+  pkill borders 2>/dev/null || true
+  borders &
+  echo "  borders    →  $BORDERS_THEME"
+fi
+
 echo ""
 echo "Done. Open a new shell for zsh changes. Restart Ghostty for terminal changes."
