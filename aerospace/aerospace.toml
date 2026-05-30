@@ -7,15 +7,15 @@ after-startup-command = ['exec-and-forget borders']
 
 [[on-window-detected]]
 if.app-id = 'com.mitchellh.ghostty'
-run = 'move-node-to-workspace G'
+run = ['move-node-to-workspace G', 'layout h_tiles']
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'Code'
-run = 'move-node-to-workspace V'
+run = ['move-node-to-workspace V', 'layout h_tiles']
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'Google Chrome'
-run = 'move-node-to-workspace C'
+run = ['move-node-to-workspace C', 'layout h_tiles']
 
 [gaps]
 inner.horizontal = 10
