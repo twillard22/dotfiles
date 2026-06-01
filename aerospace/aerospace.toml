@@ -53,9 +53,10 @@ alt-shift-ctrl-l = 'join-with right'
 # Layouts
 alt-slash      = 'layout tiles horizontal vertical'
 
-# Float / tile
+# Float / tile / accordion
 alt-f = 'layout floating'
 alt-t = 'layout tiling'
+alt-a = 'layout accordion'
 
 # Fullscreen toggle
 alt-shift-f = 'fullscreen'
