@@ -68,6 +68,9 @@ alias find='fd'
 alias grep='rg'
 eval "$(zoxide init zsh)"
 
+# react native
+alias rn:reverse='adb reverse tcp:8081 tcp:8081'
+
 # claude
 export PATH="$HOME/.local/bin:$PATH"
 
