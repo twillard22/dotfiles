@@ -100,6 +100,17 @@ if [ ! -e "$DOTFILES/borders/active" ]; then
 fi
 symlink "$DOTFILES/borders/active" "$HOME/.config/borders/bordersrc"
 
+# ── Neovim ────────────────────────────────────────────────────────────────────
+echo "==> Linking Neovim config..."
+mkdir -p "$HOME/.config"
+symlink "$DOTFILES/nvim" "$HOME/.config/nvim"
+# Seed the theme state file if it doesn't exist yet
+mkdir -p "$HOME/.local/state/nvim"
+if [ ! -f "$HOME/.local/state/nvim/theme" ]; then
+  echo "neon-sign-muted" > "$HOME/.local/state/nvim/theme"
+  echo "  nvim theme state → neon-sign-muted (default)"
+fi
+
 # ── Starship ──────────────────────────────────────────────────────────────────
 echo "==> Linking Starship config..."
 mkdir -p "$HOME/.config"

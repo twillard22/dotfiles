@@ -70,6 +70,7 @@ alt-5 = 'workspace 5'
 alt-v = 'workspace V'
 alt-c = 'workspace C'
 alt-g = 'workspace G'
+alt-n = 'workspace N'
 
 # Move window to workspace with Alt+Shift+1-9
 alt-shift-1 = 'move-node-to-workspace 1'
@@ -80,6 +81,7 @@ alt-shift-5 = 'move-node-to-workspace 5'
 alt-shift-v = 'move-node-to-workspace V'
 alt-shift-c = 'move-node-to-workspace C'
 alt-shift-g = 'move-node-to-workspace G'
+alt-shift-n = 'move-node-to-workspace N'
 
 # Move window to next/prev monitor
 alt-shift-tab = 'move-node-to-monitor next'

@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal dev environment — shell, git, mise, Homebrew packages, VSCode config, and Claude Code config.
+Personal dev environment — shell, git, mise, Homebrew packages, VSCode, Neovim, and Claude Code config.
 
 ## Structure
 
@@ -23,11 +23,22 @@ Personal dev environment — shell, git, mise, Homebrew packages, VSCode config,
     starship.toml        ← symlink → active theme (managed by theme-switch.sh)
     neon-sign.toml
     neon-sign-muted.toml
+  nvim/                  ← symlinked to ~/.config/nvim (LazyVim + neon-sign colorscheme)
+    init.lua             ← LazyVim entry point
+    lua/
+      config/lazy.lua    ← lazy.nvim bootstrap
+      neon-sign/         ← theme engine (shared by both colorscheme variants)
+      plugins/
+        neon-sign.lua    ← LazyVim spec; reads ~/.local/state/nvim/theme for active variant
+    colors/
+      neon-sign.lua      ← vivid palette entry point
+      neon-sign-muted.lua ← muted palette entry point
   vscode/
     settings.json        ← symlinked to ~/Library/Application Support/Code/User/settings.json
   vscode-themes/         ← custom VS Code theme extensions, each symlinked to ~/.vscode/extensions/
     neon-sign/           ← copied from github.com/twillard22/neon-sign (see note in Themes section)
     neon-sign-muted/
+  Neon Sign Preview.html ← combined theme preview (VS Code · Neovim · Ghostty/zsh · Claude)
   themes/                ← zsh theme files, sourced at shell startup
     active/              ← symlink → active theme dir (managed by theme-switch.sh)
     neon-sign/
@@ -72,11 +83,14 @@ git clone --recurse-submodules https://github.com/twillard22/dotfiles ~/.dotfile
 cd ~/.dotfiles && ./setup.sh
 ```
 
+After the first run, the `dotfiles` alias is available in your shell — run `dotfiles` from anywhere to re-run setup.
+
 This will:
 - Install Homebrew (if not present)
-- Install all packages from `Brewfile` (`brew bundle`) including starship, zsh plugins, and Fira Code Nerd Font
+- Install all packages from `Brewfile` (`brew bundle`) including starship, zsh plugins, neovim, lazygit, and Fira Code Nerd Font
 - Run `git lfs install`
-- Symlink `.zshrc`, `.gitconfig`, `mise/config.toml`, `starship.toml`, `ghostty/config`, VSCode `settings.json`, and Claude config
+- Symlink `.zshrc`, `.gitconfig`, `mise/config.toml`, `starship.toml`, `ghostty/config`, `nvim/`, VSCode `settings.json`, and Claude config
+- Seed `~/.local/state/nvim/theme` with `neon-sign-muted` (nvim reads this on startup to pick the active colorscheme)
 - Configure `~/.gnupg/gpg-agent.conf` to use `pinentry-mac`
 - Run `mise install` (node, bun, pnpm, ruby, yarn)
 - Install custom theme VSIXs (neon-sign, neon-sign-muted) and Marketplace extensions (ESLint, Prettier)
@@ -229,9 +243,10 @@ code --install-extension tw-<name>-1.0.0.vsix
 
 ### How it works
 
-- **theme-switch.sh** updates five things atomically: `themes/active` symlink (zsh),
+- **theme-switch.sh** updates six things atomically: `themes/active` symlink (zsh),
   `starship/starship.toml` symlink, `ghostty/config` theme line, `vscode/settings.json` colorTheme,
-  and `~/.claude/settings.json` theme (written as `custom:<slug>`)
+  `~/.claude/settings.json` theme (written as `custom:<slug>`), and `~/.local/state/nvim/theme`
+  (nvim reads this state file on startup — running instances pick it up on next open)
 - **zshrc** sources `themes/active/zsh-autosuggest.zsh` and `themes/active/zsh-highlights.zsh`
   before the plugin sources, so the active theme's colors are always loaded
 - **Ghostty** reads `~/.config/ghostty/themes/<name>`, which is symlinked from `ghostty/themes/<name>`
