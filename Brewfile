@@ -20,6 +20,8 @@ brew "pinentry-mac"
 brew "supabase/tap/supabase"
 brew "tmux"
 brew "watchman"
+brew "neovim"
+brew "lazygit"
 tap "nikitabobko/tap"
 tap "FelixKratz/formulae"
 

@@ -74,6 +74,9 @@ alias rn:reverse='adb reverse tcp:8081 tcp:8081'
 # claude
 export PATH="$HOME/.local/bin:$PATH"
 
+# dotfiles
+alias dotfiles="$HOME/.dotfiles/setup.sh"
+
 # theme switching
 alias theme-switch="$HOME/.dotfiles/theme-switch.sh"
 

@@ -79,6 +79,18 @@ if [ -n "$CLAUDE_THEME" ]; then
   fi
 fi
 
+# Neovim (writes state file; running instances pick it up on next open)
+case "$THEME" in
+  neon-sign)        NVIM_THEME="neon-sign" ;;
+  neon-sign-muted)  NVIM_THEME="neon-sign-muted" ;;
+  *) echo "  WARNING: no Neovim mapping for $THEME — skipping"; NVIM_THEME="" ;;
+esac
+if [ -n "$NVIM_THEME" ]; then
+  mkdir -p "$HOME/.local/state/nvim"
+  echo "$NVIM_THEME" > "$HOME/.local/state/nvim/theme"
+  echo "  nvim       →  $NVIM_THEME"
+fi
+
 # Borders
 case "$THEME" in
   neon-sign)        BORDERS_THEME="neon-sign" ;;
