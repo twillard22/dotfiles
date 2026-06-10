@@ -108,10 +108,9 @@ across machines — anything worth remembering should live in the repo instead.
 
 ## Known non-issues — do not re-raise
 
-**`settings.local.json` in gitignore:** `.claude/settings.local.json` is gitignored in the
-dotfiles repo's `.gitignore` (not the global one). Claude Code creates this file in any project
-directory it's opened in, including the dotfiles repo itself. Do not suggest adding it to the
-global gitignore — the dotfiles-local rule is sufficient.
+**`settings.local.json` in gitignore:** `.claude/settings.local.json` is in the global gitignore
+(`git/gitignore_global`, symlinked to `~/.gitignore_global`), so it's ignored in every repo on
+this machine, including the dotfiles repo itself. Do not re-raise this as untracked/needs-ignoring.
 
 ## Creating a new theme
 
