@@ -1,0 +1,11 @@
+{
+  "model": "opus",
+  "enabledPlugins": {
+    "supabase@claude-plugins-official": true,
+    "figma@claude-plugins-official": true
+  },
+  "effortLevel": "high",
+  "tui": "fullscreen",
+  "autoMemoryEnabled": false,
+  "theme": "custom:neon-sign-muted"
+}

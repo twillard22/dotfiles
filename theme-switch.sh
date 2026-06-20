@@ -63,19 +63,20 @@ if [ -n "$VSCODE_THEME" ]; then
   echo "  vscode     →  $VSCODE_THEME"
 fi
 
-# Claude Code (writes active theme into the local, untracked ~/.claude/settings.json)
+# Claude Code (writes active theme into the tracked claude/settings.json, which is
+# symlinked to ~/.claude/settings.json — edit the repo file so the symlink stays intact)
 case "$THEME" in
   neon-sign)        CLAUDE_THEME="neon-sign" ;;
   neon-sign-muted)  CLAUDE_THEME="neon-sign-muted" ;;
   *) echo "  WARNING: no Claude Code mapping for $THEME — skipping"; CLAUDE_THEME="" ;;
 esac
 if [ -n "$CLAUDE_THEME" ]; then
-  CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+  CLAUDE_SETTINGS="$DOTFILES/claude/settings.json"
   if [ -f "$CLAUDE_SETTINGS" ]; then
     sed -i '' "s|\"theme\": \".*\"|\"theme\": \"custom:$CLAUDE_THEME\"|" "$CLAUDE_SETTINGS"
     echo "  claude     →  $CLAUDE_THEME"
   else
-    echo "  WARNING: ~/.claude/settings.json not found — skipping Claude theme"
+    echo "  WARNING: $CLAUDE_SETTINGS not found — skipping Claude theme"
   fi
 fi
 

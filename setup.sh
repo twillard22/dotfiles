@@ -127,25 +127,10 @@ symlink "$DOTFILES/claude/themes/neon-sign-muted.json" "$HOME/.claude/themes/neo
 # Invokable skills — add one line per skill in claude/skills/
 # symlink "$DOTFILES/claude/skills/tanstack-start-setup" "$HOME/.claude/skills/tanstack-start-setup"
 
-# TUI fullscreen mode (alternate screen buffer, mouse support, no flicker)
-CLAUDE_SETTINGS="$HOME/.claude/settings.json"
-if ! grep -q '"tui"' "$CLAUDE_SETTINGS" 2>/dev/null; then
-  if [ -f "$CLAUDE_SETTINGS" ]; then
-    python3 -c "
-import json
-with open('$CLAUDE_SETTINGS') as f:
-    d = json.load(f)
-d['tui'] = 'fullscreen'
-with open('$CLAUDE_SETTINGS', 'w') as f:
-    json.dump(d, f, indent=2)
-"
-  else
-    echo '{"tui": "fullscreen"}' > "$CLAUDE_SETTINGS"
-  fi
-  echo "  claude tui → fullscreen"
-else
-  echo "  claude tui already configured"
-fi
+# Global Claude settings (model, plugins, effort, tui, auto-memory, theme).
+# Tracked + symlinked so it's shared across machines; per-machine overrides
+# (permissions, etc.) live in the gitignored ~/.claude/settings.local.json.
+symlink "$DOTFILES/claude/settings.json" "$HOME/.claude/settings.json"
 
 # ── Themes ────────────────────────────────────────────────────────────────────
 echo "==> Setting up themes..."
