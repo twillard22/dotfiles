@@ -124,6 +124,9 @@ symlink "$DOTFILES/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 symlink "$DOTFILES/claude/themes/neon-sign.json" "$HOME/.claude/themes/neon-sign.json"
 symlink "$DOTFILES/claude/themes/neon-sign-muted.json" "$HOME/.claude/themes/neon-sign-muted.json"
 
+# Work-specific Claude config lives in a separate private repo, cloned to ~/.work-claude.
+[ -x "$HOME/.work-claude/setup.sh" ] && "$HOME/.work-claude/setup.sh"
+
 # Invokable skills — add one line per skill in claude/skills/
 # symlink "$DOTFILES/claude/skills/tanstack-start-setup" "$HOME/.claude/skills/tanstack-start-setup"
 
