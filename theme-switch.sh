@@ -63,7 +63,7 @@ if [ -n "$VSCODE_THEME" ]; then
   echo "  vscode     →  $VSCODE_THEME"
 fi
 
-# Claude Code (writes active theme into the tracked claude/settings.json, which is
+# Claude Code (writes active theme into the tracked agents/settings.json, which is
 # symlinked to ~/.claude/settings.json — edit the repo file so the symlink stays intact)
 case "$THEME" in
   neon-sign)        CLAUDE_THEME="neon-sign" ;;
@@ -71,13 +71,35 @@ case "$THEME" in
   *) echo "  WARNING: no Claude Code mapping for $THEME — skipping"; CLAUDE_THEME="" ;;
 esac
 if [ -n "$CLAUDE_THEME" ]; then
-  CLAUDE_SETTINGS="$DOTFILES/claude/settings.json"
+  CLAUDE_SETTINGS="$DOTFILES/agents/settings.json"
   if [ -f "$CLAUDE_SETTINGS" ]; then
     sed -i '' "s|\"theme\": \".*\"|\"theme\": \"custom:$CLAUDE_THEME\"|" "$CLAUDE_SETTINGS"
     echo "  claude     →  $CLAUDE_THEME"
   else
     echo "  WARNING: $CLAUDE_SETTINGS not found — skipping Claude theme"
   fi
+fi
+
+# OpenCode (writes active theme into the tracked agents/opencode/tui.json, which is
+# symlinked to ~/.config/opencode/tui.json — theme names match the files in
+# agents/opencode/themes/; OpenCode picks the change up on next launch)
+case "$THEME" in
+  neon-sign)        OPENCODE_THEME="neon-sign" ;;
+  neon-sign-muted)  OPENCODE_THEME="neon-sign-muted" ;;
+  *) echo "  WARNING: no OpenCode mapping for $THEME — skipping"; OPENCODE_THEME="" ;;
+esac
+if [ -n "$OPENCODE_THEME" ]; then
+  # the live file is plugin-managed (not a symlink); update it and the tracked template
+  for OPENCODE_TUI in "$HOME/.config/opencode/tui.json" "$DOTFILES/agents/opencode/tui.json"; do
+    if [ -f "$OPENCODE_TUI" ]; then
+      if grep -q '"theme":' "$OPENCODE_TUI"; then
+        sed -i '' "s|\"theme\": \".*\"|\"theme\": \"$OPENCODE_THEME\"|" "$OPENCODE_TUI"
+      else
+        sed -i '' "s|^{|{\n  \"theme\": \"$OPENCODE_THEME\",|" "$OPENCODE_TUI"
+      fi
+    fi
+  done
+  echo "  opencode   →  $OPENCODE_THEME"
 fi
 
 # Neovim (writes state file; running instances pick it up on next open)

@@ -120,20 +120,47 @@ symlink "$DOTFILES/starship/starship.toml" "$HOME/.config/starship.toml"
 echo "==> Linking Claude config..."
 mkdir -p "$HOME/.claude/skills"
 mkdir -p "$HOME/.claude/themes"
-symlink "$DOTFILES/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-symlink "$DOTFILES/claude/themes/neon-sign.json" "$HOME/.claude/themes/neon-sign.json"
-symlink "$DOTFILES/claude/themes/neon-sign-muted.json" "$HOME/.claude/themes/neon-sign-muted.json"
+symlink "$DOTFILES/agents/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+symlink "$DOTFILES/agents/themes/neon-sign.json" "$HOME/.claude/themes/neon-sign.json"
+symlink "$DOTFILES/agents/themes/neon-sign-muted.json" "$HOME/.claude/themes/neon-sign-muted.json"
 
 # Work-specific Claude config lives in a separate private repo, cloned to ~/.work-claude.
 [ -x "$HOME/.work-claude/setup.sh" ] && "$HOME/.work-claude/setup.sh"
 
-# Invokable skills — add one line per skill in claude/skills/
-# symlink "$DOTFILES/claude/skills/tanstack-start-setup" "$HOME/.claude/skills/tanstack-start-setup"
+# Invokable skills: every directory under agents/skills/ is linked automatically.
+# Both Claude Code and OpenCode read ~/.claude/skills, so one link serves both.
+for skill in "$DOTFILES"/agents/skills/*/; do
+  [ -d "$skill" ] || continue
+  symlink "${skill%/}" "$HOME/.claude/skills/$(basename "$skill")"
+done
 
 # Global Claude settings (model, plugins, effort, tui, auto-memory, theme).
 # Tracked + symlinked so it's shared across machines; per-machine overrides
 # (permissions, etc.) live in the gitignored ~/.claude/settings.local.json.
-symlink "$DOTFILES/claude/settings.json" "$HOME/.claude/settings.json"
+symlink "$DOTFILES/agents/settings.json" "$HOME/.claude/settings.json"
+
+# ── OpenCode ──────────────────────────────────────────────────────────────────
+# Config, global AGENTS.md, themes, and oh-my-openagent routing are tracked in
+# agents/opencode/ and linked file-by-file: the plugin installer writes node_modules
+# and package.json into ~/.config/opencode, so the directory itself is never a link.
+# Credentials never live here: `opencode auth login` stores them in
+# ~/.local/share/opencode/auth.json. See agents/opencode/README.md.
+echo "==> Linking OpenCode config..."
+mkdir -p "$HOME/.config/opencode/themes" "$HOME/.omo"
+symlink "$DOTFILES/agents/opencode/opencode.jsonc" "$HOME/.config/opencode/opencode.jsonc"
+# tui.json is NOT linked: oh-my-openagent rewrites it in place (it adds itself to a
+# `plugin` array), which replaces a symlink with a real file. Seed it from the tracked
+# template once; theme-switch.sh keeps the theme key in sync afterwards.
+if [ ! -e "$HOME/.config/opencode/tui.json" ]; then
+  cp "$DOTFILES/agents/opencode/tui.json" "$HOME/.config/opencode/tui.json"
+  echo "  seeded: ~/.config/opencode/tui.json from template"
+fi
+symlink "$DOTFILES/agents/opencode/AGENTS.md" "$HOME/.config/opencode/AGENTS.md"
+symlink "$DOTFILES/agents/opencode/omo.jsonc" "$HOME/.omo/omo.jsonc"
+for theme in "$DOTFILES"/agents/opencode/themes/*.json; do
+  [ -f "$theme" ] || continue
+  symlink "$theme" "$HOME/.config/opencode/themes/$(basename "$theme")"
+done
 
 # ── Themes ────────────────────────────────────────────────────────────────────
 echo "==> Setting up themes..."
@@ -158,9 +185,9 @@ echo "       Then add the key ID to ~/.gitconfig.local (see git/gitconfig.local.
 echo "       Or import from another machine: gpg --export-secret-keys --armor KEY_ID > key.asc"
 echo "       then: gpg --import key.asc && shred -u key.asc"
 echo ""
-echo "  2. Claude Code plugins (run once inside Claude Code):"
-echo "       /plugin install supabase@claude-plugins-official"
-echo "       /plugin install figma@claude-plugins-official"
+echo "  2. OpenCode providers (API keys are stored outside the repo):"
+echo "       opencode auth login    # Anthropic, then again for OpenAI"
+echo "       opencode models anthropic && opencode models openai   # verify the IDs in agents/opencode/*.jsonc"
 echo ""
 echo "  3. Android dev (if needed):"
 echo "       Install Android Studio manually from https://developer.android.com/studio"
