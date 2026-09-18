@@ -124,8 +124,8 @@ symlink "$DOTFILES/agents/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 symlink "$DOTFILES/agents/themes/neon-sign.json" "$HOME/.claude/themes/neon-sign.json"
 symlink "$DOTFILES/agents/themes/neon-sign-muted.json" "$HOME/.claude/themes/neon-sign-muted.json"
 
-# Work-specific Claude config lives in a separate private repo, cloned to ~/.work-claude.
-[ -x "$HOME/.work-claude/setup.sh" ] && "$HOME/.work-claude/setup.sh"
+# Work-specific agent config (Later rules + skills) lives in a separate private repo, cloned to ~/.work-agents.
+[ -x "$HOME/.work-agents/setup.sh" ] && "$HOME/.work-agents/setup.sh"
 
 # Invokable skills: every directory under agents/skills/ is linked automatically.
 # Both Claude Code and OpenCode read ~/.claude/skills, so one link serves both.

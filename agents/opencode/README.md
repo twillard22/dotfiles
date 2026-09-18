@@ -8,7 +8,7 @@ Calendar, Drive, Amplitude).
 ## Layout and ownership
 
 Two repos, one rule: **public-safe and generic → `~/.dotfiles` (public). Anything
-Later-related, derived from a colleague's setup, or uncertain → `~/.work-claude`
+Later-related, derived from a colleague's setup, or uncertain → `~/.work-agents`
 (private).** Credentials go in neither.
 
 | What | Tracked at | Linked to | Owner |
@@ -19,9 +19,8 @@ Later-related, derived from a colleague's setup, or uncertain → `~/.work-claud
 | oh-my-openagent routing | `agents/opencode/omo.jsonc` | `~/.omo/omo.jsonc` | dotfiles |
 | Themes | `agents/opencode/themes/*.json` | `~/.config/opencode/themes/` | dotfiles |
 | Generic skills | `agents/skills/<name>/` | `~/.claude/skills/<name>` | dotfiles |
-| Later rules (private) | `~/.work-claude/agents/opencode/*.md` | loaded via `instructions` glob | work-claude |
-| Later skills | `~/.work-claude/agents/skills/<name>/` | `~/.claude/skills/<name>` | work-claude |
-| Colleague reference material | `~/.work-claude/reference/` | not loaded | work-claude |
+| Later rules (private) | `~/.work-agents/agents/opencode/*.md` | loaded via `instructions` glob | work-agents |
+| Later skills | `~/.work-agents/agents/skills/<name>/` | `~/.claude/skills/<name>` | work-agents |
 | Provider keys | `~/.local/share/opencode/auth.json` | written by `opencode auth login` | machine only |
 | MCP OAuth tokens | `~/.local/share/opencode/mcp-auth.json` | written by `opencode mcp auth` | machine only |
 | Plugin install output | `~/.config/opencode/node_modules`, `package*.json` | untracked | machine only |
@@ -39,7 +38,7 @@ adding anything.
    CLAUDE.md is Claude-Code-only now.
 4. Everything in the `instructions` array of `opencode.jsonc` is merged in: the
    Karpathy guideline and the private Later rules glob. Globs that match nothing are
-   fine, so a machine without work-claude still starts.
+   fine, so a machine without work-agents still starts.
 
 OpenCode does not parse Claude's `@path` includes. A guideline that must load
 everywhere goes in `instructions`, not in an `@` line.
@@ -69,11 +68,11 @@ check the symlink under `~/.claude/skills/` and the frontmatter.
 Public-safe checklist before committing to dotfiles: no GitHub handles, no Linear or
 other UUIDs, no IPs or hostnames, no ticket or PR numbers, no internal env var names,
 no file paths inside work repos. If any of those are load-bearing, the skill belongs in
-work-claude.
+work-agents.
 
 ## Add a Later skill
 
-Same steps in `~/.work-claude/agents/skills/<name>/`. Its `setup.sh` links every
+Same steps in `~/.work-agents/agents/skills/<name>/`. Its `setup.sh` links every
 directory automatically. Commit there. Skills that mature are promoted to
 `the employer's shared skills repo`.
 

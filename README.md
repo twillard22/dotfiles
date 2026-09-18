@@ -308,7 +308,7 @@ cd ~/.dotfiles && ./setup.sh                                 # links every dir a
 git add -A && git commit -m "add <name> skill"
 ```
 
-Later-specific skills go in `~/.work-claude/agents/skills/` instead (private repo).
+Later-specific skills go in `~/.work-agents/agents/skills/` instead (private repo).
 
 ### Updating guideline submodules
 
