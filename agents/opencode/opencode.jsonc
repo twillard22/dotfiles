@@ -15,7 +15,7 @@
   // this array is not documented.
   "instructions": [
     "/Users/trenton.willard/.dotfiles/agents/guidelines/karpathy/skills/karpathy-guidelines/SKILL.md",
-    "/Users/trenton.willard/.work-claude/agents/opencode/*.md"
+    "/Users/trenton.willard/.work-agents/agents/opencode/*.md"
   ],
 
   "provider": {
