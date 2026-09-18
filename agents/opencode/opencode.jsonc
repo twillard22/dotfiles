@@ -1,0 +1,110 @@
+// OpenCode global config. Symlinked to ~/.config/opencode/opencode.jsonc by setup.sh.
+// No secrets here, ever: provider keys come from `opencode auth login` and live in
+// ~/.local/share/opencode/auth.json. See agents/opencode/README.md.
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "plugin": ["oh-my-openagent@latest"],
+
+  // Default model for plain sessions. oh-my-openagent's per-agent routing lives in
+  // agents/opencode/omo.jsonc (symlinked to ~/.omo/omo.jsonc).
+  "model": "anthropic/claude-fable-5-1",
+
+  // Always-loaded guidelines. OpenCode does not parse Claude's `@path` includes, so
+  // anything CLAUDE.md used to include goes here. Absolute paths: `~` expansion in
+  // this array is not documented.
+  "instructions": [
+    "/Users/trenton.willard/.dotfiles/agents/guidelines/karpathy/skills/karpathy-guidelines/SKILL.md",
+    "/Users/trenton.willard/.work-claude/agents/opencode/*.md"
+  ],
+
+  "provider": {
+    "anthropic": {
+      "name": "Anthropic",
+      "models": {
+        "claude-fable-5-1": {
+          "name": "Claude Fable 5.1",
+          "variants": {
+            "low": {"thinking": {"type": "adaptive"}, "effort": "low"},
+            "medium": {"thinking": {"type": "adaptive"}, "effort": "medium"},
+            "high": {"thinking": {"type": "adaptive"}, "effort": "high"},
+            "max": {"thinking": {"type": "adaptive"}, "effort": "max"}
+          }
+        },
+        "claude-sonnet-5": {
+          "name": "Claude Sonnet 5",
+          "variants": {
+            "low": {"thinking": {"type": "adaptive"}, "effort": "low"},
+            "medium": {"thinking": {"type": "adaptive"}, "effort": "medium"},
+            "high": {"thinking": {"type": "adaptive"}, "effort": "high"},
+            "max": {"thinking": {"type": "adaptive"}, "effort": "max"}
+          }
+        },
+        "claude-haiku-4-5": {"name": "Claude Haiku 4.5"}
+      }
+    },
+    "openai": {
+      "name": "OpenAI",
+      "models": {
+        "gpt-5.6": {
+          "name": "GPT-5.6",
+          "options": {"reasoningEffort": "high", "textVerbosity": "low", "reasoningSummary": "auto"},
+          "variants": {
+            "low": {"reasoningEffort": "low", "textVerbosity": "low", "reasoningSummary": "auto"},
+            "medium": {"reasoningEffort": "medium", "textVerbosity": "low", "reasoningSummary": "auto"},
+            "high": {"reasoningEffort": "high", "textVerbosity": "low", "reasoningSummary": "auto"},
+            "xhigh": {"reasoningEffort": "xhigh", "textVerbosity": "low", "reasoningSummary": "auto"},
+            "max": {"reasoningEffort": "max", "textVerbosity": "low", "reasoningSummary": "auto"}
+          }
+        },
+        "gpt-6-astra": {
+          "name": "GPT-6 Astra",
+          "options": {"reasoningEffort": "high", "textVerbosity": "low", "reasoningSummary": "auto"},
+          "variants": {
+            "low": {"reasoningEffort": "low", "textVerbosity": "low", "reasoningSummary": "auto"},
+            "medium": {"reasoningEffort": "medium", "textVerbosity": "low", "reasoningSummary": "auto"},
+            "high": {"reasoningEffort": "high", "textVerbosity": "low", "reasoningSummary": "auto"},
+            "xhigh": {"reasoningEffort": "xhigh", "textVerbosity": "low", "reasoningSummary": "auto"},
+            "max": {"reasoningEffort": "max", "textVerbosity": "low", "reasoningSummary": "auto"}
+          }
+        }
+      }
+    }
+  },
+
+  // Durable allow-list distilled from ~/.claude/**/settings.local.json. Last matching
+  // rule wins, so the catch-all comes first. Project-specific one-offs (xcodebuild
+  // invocations, perl rewrites) were deliberately not carried over.
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git *": "allow",
+      "git push*": "ask",
+      "gh pr view*": "allow",
+      "gh pr diff*": "allow",
+      "gh pr checks*": "allow",
+      "gh pr list*": "allow",
+      "gh api *": "allow",
+      "gh auth *": "allow",
+      "gh run *": "allow",
+      "yarn type-check*": "allow",
+      "yarn tsc*": "allow",
+      "yarn test*": "allow",
+      "yarn jest*": "allow",
+      "yarn lint*": "allow",
+      "yarn prettier*": "allow",
+      "yarn format-check*": "allow",
+      "yarn codegen*": "allow",
+      "yarn install*": "allow",
+      "curl *": "allow",
+      "python3 *": "allow",
+      "xcrun simctl *": "allow",
+      "brew list*": "allow",
+      "brew leaves*": "allow",
+      "defaults read *": "allow",
+      "rm -rf *": "deny"
+    },
+    "webfetch": "allow",
+    "skill": "allow"
+  }
+}

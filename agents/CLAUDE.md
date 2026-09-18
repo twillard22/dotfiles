@@ -40,7 +40,7 @@ framework guarantees.
 
 # Dotfiles Setup
 
-This file lives at `~/.dotfiles/claude/CLAUDE.md` and is symlinked to `~/.claude/CLAUDE.md`.
+This file lives at `~/.dotfiles/agents/CLAUDE.md` and is symlinked to `~/.claude/CLAUDE.md`.
 Claude Code loads it automatically for every project on this machine.
 
 ## New machine setup
@@ -59,10 +59,9 @@ cp ~/.dotfiles/git/gitconfig.local.example ~/.gitconfig.local
 # edit to fill in this machine's email + signingkey
 ```
 
-Then reinstall Claude Code plugins (can't be scripted — run once in Claude Code):
+Then connect OpenCode providers (keys are stored outside the repo; see `agents/opencode/README.md`):
 ```
-/plugin install supabase@claude-plugins-official
-/plugin install figma@claude-plugins-official
+opencode auth login   # Anthropic, then OpenAI
 ```
 
 ## Adding a new always-loaded guideline
@@ -71,24 +70,25 @@ Always-loaded guidelines are `@path` included at the top of this file — Claude
 at the start of every conversation without being asked.
 
 **From an external repo (recommended for third-party guidelines):**
-1. Add it as a submodule: `cd ~/.dotfiles && git submodule add <url> claude/guidelines/<name>`
+1. Add it as a submodule: `cd ~/.dotfiles && git submodule add <url> agents/guidelines/<name>`
 2. Add an `@path` line at the top of this file: `@guidelines/<name>/path/to/SKILL.md`
 3. Commit: `git add -A && git commit -m "add <name> guideline"`
 
 **As a plain file (for your own guidelines):**
-1. Create `claude/guidelines/<name>.md` with your content
+1. Create `agents/guidelines/<name>.md` with your content
 2. Add an `@path` line at the top of this file: `@guidelines/<name>.md`
 3. Commit
 
 ## Adding a new invokable skill
 
 Invokable skills are callable mid-conversation (e.g. `/tanstack-start-setup`). They live in
-`claude/skills/` and are symlinked into `~/.claude/skills/` by `setup.sh`.
+`agents/skills/` and are symlinked into `~/.claude/skills/` by `setup.sh`.
 
-1. Create `claude/skills/<name>/SKILL.md` with your skill content
-2. Add one line to `setup.sh`: `symlink "$DOTFILES/claude/skills/<name>" "$HOME/.claude/skills/<name>"`
-3. Run `setup.sh` to activate: `cd ~/.dotfiles && ./setup.sh`
-4. Commit: `git add -A && git commit -m "add <name> skill"`
+1. Copy `agents/opencode/skill-template` to `agents/skills/<name>/` and edit `SKILL.md` (frontmatter `name` must equal the directory name)
+2. Run `setup.sh` to activate: `cd ~/.dotfiles && ./setup.sh` (every directory under `agents/skills/` is linked automatically; OpenCode reads the same path)
+3. Commit: `git add -A && git commit -m "add <name> skill"`
+
+Full OpenCode how-to: `agents/opencode/README.md`.
 
 ## Updating guideline submodules
 
@@ -122,9 +122,9 @@ The correct process:
 3. Once the user returns with the generated files, wire everything up:
    - Place files into `vscode-themes/<name>/themes/<name>.json`, `ghostty/themes/<name>`, `starship/<name>.toml`, `themes/<name>/zsh-highlights.zsh`, `themes/<name>/zsh-autosuggest.zsh`
    - Create `vscode-themes/<name>/package.json` (copy structure from an existing one)
-   - Add three case entries to `theme-switch.sh` (Ghostty block, VS Code block, Claude Code block)
-   - Add `claude/themes/<name>.json` with `{ "name": "...", "base": "dark", "overrides": { ... } }`
-   - Add a symlink line to `setup.sh`: `symlink "$DOTFILES/claude/themes/<name>.json" "$HOME/.claude/themes/<name>.json"`
+   - Add four case entries to `theme-switch.sh` (Ghostty block, VS Code block, Claude Code block, OpenCode block)
+   - Add `agents/themes/<name>.json` with `{ "name": "...", "base": "dark", "overrides": { ... } }` (Claude Code) and `agents/opencode/themes/<name>.json` in OpenCode's `defs` + `theme` schema (copy an existing one)
+   - Add a symlink line to `setup.sh`: `symlink "$DOTFILES/agents/themes/<name>.json" "$HOME/.claude/themes/<name>.json"`
    - Package and install the VS Code extension: `cd vscode-themes/<name> && vsce package --allow-missing-repository && code --install-extension tw-<name>-1.0.0.vsix`
    - Symlink the Ghostty theme: `ln -sf ~/.dotfiles/ghostty/themes/<name> ~/.config/ghostty/themes/<name>`
    - Run `setup.sh` to activate symlinks, then `theme-switch <name>` to activate

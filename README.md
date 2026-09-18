@@ -48,12 +48,20 @@ Personal dev environment — shell, git, mise, Homebrew packages, VSCode, Neovim
       zsh-highlights.zsh
       zsh-autosuggest.zsh
     NEW-THEME.md         ← template: paste into claude.ai to generate a new theme
-  claude/
-    CLAUDE.md            ← symlinked to ~/.claude/CLAUDE.md (global principles + @path includes)
-    guidelines/          ← always loaded every conversation via @path in CLAUDE.md
+  agents/                ← tool-neutral agent config (OpenCode is primary, Claude Code secondary)
+    opencode/            ← see agents/opencode/README.md for the full how-to
+      opencode.jsonc     ← symlinked to ~/.config/opencode/opencode.jsonc (providers, instructions, permissions)
+      tui.json           ← symlinked to ~/.config/opencode/tui.json (theme)
+      AGENTS.md          ← symlinked to ~/.config/opencode/AGENTS.md (global rules)
+      omo.jsonc          ← symlinked to ~/.omo/omo.jsonc (oh-my-openagent model routing)
+      themes/            ← OpenCode theme JSONs, symlinked to ~/.config/opencode/themes/
+      skill-template/    ← copy to start a new skill
+    skills/              ← invokable skills; every dir is symlinked to ~/.claude/skills/ (both tools read it)
+    guidelines/          ← always-loaded guidelines (OpenCode: `instructions` in opencode.jsonc; Claude: @path)
       karpathy/          ← submodule: github.com/multica-ai/andrej-karpathy-skills
-    skills/              ← invokable skills, symlinked to ~/.claude/skills/ by setup.sh
-    themes/              ← Claude Code theme JSONs, symlinked to ~/.claude/themes/ by setup.sh
+    CLAUDE.md            ← symlinked to ~/.claude/CLAUDE.md (Claude Code only)
+    settings.json        ← symlinked to ~/.claude/settings.json (Claude Code only)
+    themes/              ← Claude Code theme JSONs, symlinked to ~/.claude/themes/
   design-todo.md         ← tasks requiring claude.ai design credits to complete
 ```
 
@@ -133,14 +141,18 @@ Switch the dotfiles remote to SSH:
 git -C ~/.dotfiles remote set-url origin git@github.com:twillard22/dotfiles.git
 ```
 
-### 6. Claude Code plugins
+### 6. OpenCode providers
 
-Run once inside Claude Code (can't be scripted):
+API keys are stored by OpenCode outside the repo (`~/.local/share/opencode/auth.json`):
 
 ```
-/plugin install supabase@claude-plugins-official
-/plugin install figma@claude-plugins-official
+opencode auth login          # Anthropic platform key
+opencode auth login          # OpenAI platform key
+opencode models anthropic    # confirm the model IDs used in agents/opencode/*.jsonc
+opencode models openai
 ```
+
+Full details, first-run checklist, and the artifact smoke test: `agents/opencode/README.md`.
 
 ### 7. Manual steps
 
@@ -204,8 +216,8 @@ cp ~/Development/neon-sign/zsh/neon-sign-muted-highlights.zsh ~/.dotfiles/themes
 cp ~/Development/neon-sign/zsh/neon-sign-muted-autosuggest.zsh ~/.dotfiles/themes/neon-sign-muted/zsh-autosuggest.zsh
 cp ~/Development/neon-sign/themes/neon-sign.json ~/.dotfiles/vscode-themes/neon-sign/themes/
 cp ~/Development/neon-sign/themes/neon-sign-muted.json ~/.dotfiles/vscode-themes/neon-sign-muted/themes/
-cp ~/Development/neon-sign/claude/neon-sign.json ~/.dotfiles/claude/themes/neon-sign.json
-cp ~/Development/neon-sign/claude/neon-sign-muted.json ~/.dotfiles/claude/themes/neon-sign-muted.json
+cp ~/Development/neon-sign/claude/neon-sign.json ~/.dotfiles/agents/themes/neon-sign.json
+cp ~/Development/neon-sign/claude/neon-sign-muted.json ~/.dotfiles/agents/themes/neon-sign-muted.json
 # Then rebuild VSIXs and commit
 ```
 
@@ -263,34 +275,40 @@ brew install <package>
 # Add it to Brewfile manually, then commit
 ```
 
-### Adding an always-loaded Claude guideline
+### Adding an always-loaded guideline
 
-Always-loaded guidelines are `@path` included at the top of `claude/CLAUDE.md`.
+OpenCode loads guidelines from the `instructions` array in `agents/opencode/opencode.jsonc`
+(absolute paths or globs). Claude Code loads them via `@path` lines at the top of
+`agents/CLAUDE.md`. Add to both while both tools are installed.
 
 **From an external repo (submodule):**
 ```bash
 cd ~/.dotfiles
-git submodule add <url> claude/guidelines/<name>
-# Add @guidelines/<name>/path/to/SKILL.md to claude/CLAUDE.md
+git submodule add <url> agents/guidelines/<name>
+# Add the absolute path to `instructions` in agents/opencode/opencode.jsonc
+# Add @guidelines/<name>/path/to/SKILL.md to agents/CLAUDE.md
 git add -A && git commit -m "add <name> guideline"
 ```
 
 **As a plain file:**
 ```bash
-# Create claude/guidelines/<name>.md
-# Add @guidelines/<name>.md to claude/CLAUDE.md
+# Create agents/guidelines/<name>.md
+# Add @guidelines/<name>.md to agents/CLAUDE.md
 git add -A && git commit -m "add <name> guideline"
 ```
 
-### Adding an invokable Claude skill
+### Adding an invokable skill
+
+Full walkthrough and the public-safe checklist: `agents/opencode/README.md`.
 
 ```bash
-# 1. Create claude/skills/<name>/SKILL.md
-# 2. Add to setup.sh:
-#    symlink "$DOTFILES/claude/skills/<name>" "$HOME/.claude/skills/<name>"
-cd ~/.dotfiles && ./setup.sh
+cp -R agents/opencode/skill-template agents/skills/<name>   # name: lowercase, hyphens
+# edit agents/skills/<name>/SKILL.md — frontmatter `name` must equal the directory name
+cd ~/.dotfiles && ./setup.sh                                 # links every dir automatically
 git add -A && git commit -m "add <name> skill"
 ```
+
+Later-specific skills go in `~/.work-claude/agents/skills/` instead (private repo).
 
 ### Updating guideline submodules
 
