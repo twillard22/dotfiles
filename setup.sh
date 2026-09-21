@@ -1,34 +1,86 @@
 #!/usr/bin/env bash
 set -e
 
-DOTFILES="$(cd "$(dirname "$0")" && pwd)"
+DOTFILES="${DOTFILES_DIR:-$(cd "$(dirname "$0")" && pwd)}"
+export DOTFILES_DIR="$DOTFILES"
+WORK_AGENTS_DIR="${WORK_AGENTS_DIR:-$HOME/.work-agents}"
+export WORK_AGENTS_DIR
+. "$DOTFILES/agents/lib.sh"
+PROFILE_FILE="$HOME/.config/agents/profile"
 
-symlink() {
-  local src="$1"
-  local dst="$2"
+usage() {
+  echo "usage: setup.sh --profile personal|work" >&2
+}
 
-  if [ -L "$dst" ]; then
-    echo "  already linked: $dst"
-  elif [ -e "$dst" ]; then
-    echo "  WARNING: $dst exists and is not a symlink — skipping (move it manually)"
+PROFILE=""
+PROFILE_SET=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --profile)
+      if [ $# -lt 2 ]; then
+        usage
+        exit 1
+      fi
+      PROFILE="$2"
+      PROFILE_SET=1
+      shift 2
+      ;;
+    --profile=*)
+      PROFILE="${1#--profile=}"
+      PROFILE_SET=1
+      shift
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$PROFILE_SET" -eq 0 ]; then
+  if [ -f "$PROFILE_FILE" ]; then
+    PROFILE="$(tr -d '[:space:]' < "$PROFILE_FILE")"
   else
-    ln -s "$src" "$dst"
-    echo "  linked: $dst → $src"
+    echo "usage: setup.sh --profile personal|work (no profile saved at $PROFILE_FILE)" >&2
+    exit 1
   fi
+fi
+
+case "$PROFILE" in
+  personal | work) ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac
+
+if [ "$PROFILE" = "work" ] && [ ! -x "$WORK_AGENTS_DIR/setup.sh" ]; then
+  echo "Work profile requires $WORK_AGENTS_DIR/setup.sh; run: git clone git@github.com:twillard22/work-agents.git ~/.work-agents" >&2
+  exit 1
+fi
+
+mkdir -p "$(dirname "$PROFILE_FILE")"
+printf '%s\n' "$PROFILE" > "$PROFILE_FILE"
+echo "==> Profile: $PROFILE"
+
+skip_install() {
+  [ "${DOTFILES_SKIP_INSTALL:-}" = 1 ]
 }
 
 echo "==> Setting up dotfiles from $DOTFILES"
 
 # ── Homebrew ──────────────────────────────────────────────────────────────────
-if ! command -v brew &>/dev/null; then
-  echo "==> Installing Homebrew..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
-eval "$(/opt/homebrew/bin/brew shellenv)"
+if ! skip_install; then
+  if ! command -v brew &>/dev/null; then
+    echo "==> Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+  eval "$(/opt/homebrew/bin/brew shellenv)"
 
-echo "==> Installing Homebrew packages..."
-brew bundle --file="$DOTFILES/Brewfile"
-git lfs install
+  echo "==> Installing Homebrew packages..."
+  brew bundle --file="$DOTFILES/Brewfile"
+  git lfs install
+fi
 
 # ── Shell ─────────────────────────────────────────────────────────────────────
 echo "==> Linking shell config..."
@@ -44,26 +96,30 @@ echo "==> Linking mise config..."
 mkdir -p "$HOME/.config/mise"
 symlink "$DOTFILES/mise/config.toml" "$HOME/.config/mise/config.toml"
 
-echo "==> Installing mise tools (node, bun, pnpm, ruby, yarn)..."
-mise trust "$DOTFILES/mise/config.toml"
-mise install
+if ! skip_install; then
+  echo "==> Installing mise tools (node, bun, pnpm, ruby, yarn)..."
+  mise trust "$DOTFILES/mise/config.toml"
+  mise install
+fi
 
 # ── GPG ───────────────────────────────────────────────────────────────────────
-echo "==> Configuring GPG agent..."
-mkdir -p "$HOME/.gnupg"
-chmod 700 "$HOME/.gnupg"
-PINENTRY="$(brew --prefix)/bin/pinentry-mac"
-AGENT_CONF="$HOME/.gnupg/gpg-agent.conf"
-if ! grep -q "pinentry-program" "$AGENT_CONF" 2>/dev/null; then
-  # If the file exists without a trailing newline, `>>` merges the appended
-  # line onto the previous one and gpg-agent silently ignores the directive.
-  if [ -s "$AGENT_CONF" ] && [ -n "$(tail -c1 "$AGENT_CONF")" ]; then
-    printf '\n' >> "$AGENT_CONF"
+if ! skip_install; then
+  echo "==> Configuring GPG agent..."
+  mkdir -p "$HOME/.gnupg"
+  chmod 700 "$HOME/.gnupg"
+  PINENTRY="$(brew --prefix)/bin/pinentry-mac"
+  AGENT_CONF="$HOME/.gnupg/gpg-agent.conf"
+  if ! grep -q "pinentry-program" "$AGENT_CONF" 2>/dev/null; then
+    # If the file exists without a trailing newline, `>>` merges the appended
+    # line onto the previous one and gpg-agent silently ignores the directive.
+    if [ -s "$AGENT_CONF" ] && [ -n "$(tail -c1 "$AGENT_CONF")" ]; then
+      printf '\n' >> "$AGENT_CONF"
+    fi
+    echo "pinentry-program $PINENTRY" >> "$AGENT_CONF"
+    echo "  wrote pinentry-program to $AGENT_CONF"
+  else
+    echo "  gpg-agent.conf already configured"
   fi
-  echo "pinentry-program $PINENTRY" >> "$AGENT_CONF"
-  echo "  wrote pinentry-program to $AGENT_CONF"
-else
-  echo "  gpg-agent.conf already configured"
 fi
 
 # ── VSCode ────────────────────────────────────────────────────────────────────
@@ -71,13 +127,15 @@ echo "==> Linking VSCode settings..."
 mkdir -p "$HOME/Library/Application Support/Code/User"
 symlink "$DOTFILES/vscode/settings.json" "$HOME/Library/Application Support/Code/User/settings.json"
 
-echo "==> Installing custom VSCode themes..."
-code --install-extension "$DOTFILES/vscode-themes/neon-sign/tw-neon-sign-1.0.0.vsix"
-code --install-extension "$DOTFILES/vscode-themes/neon-sign-muted/tw-neon-sign-muted-1.0.0.vsix"
+if ! skip_install; then
+  echo "==> Installing custom VSCode themes..."
+  code --install-extension "$DOTFILES/vscode-themes/neon-sign/tw-neon-sign-1.0.0.vsix"
+  code --install-extension "$DOTFILES/vscode-themes/neon-sign-muted/tw-neon-sign-muted-1.0.0.vsix"
 
-echo "==> Installing VSCode extensions..."
-code --install-extension dbaeumer.vscode-eslint
-code --install-extension esbenp.prettier-vscode
+  echo "==> Installing VSCode extensions..."
+  code --install-extension dbaeumer.vscode-eslint
+  code --install-extension esbenp.prettier-vscode
+fi
 
 # ── Ghostty ───────────────────────────────────────────────────────────────────
 echo "==> Linking Ghostty config..."
@@ -118,14 +176,21 @@ symlink "$DOTFILES/starship/starship.toml" "$HOME/.config/starship.toml"
 
 # ── Claude ────────────────────────────────────────────────────────────────────
 echo "==> Linking Claude config..."
-mkdir -p "$HOME/.claude/skills"
-mkdir -p "$HOME/.claude/themes"
-symlink "$DOTFILES/agents/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-symlink "$DOTFILES/agents/themes/neon-sign.json" "$HOME/.claude/themes/neon-sign.json"
-symlink "$DOTFILES/agents/themes/neon-sign-muted.json" "$HOME/.claude/themes/neon-sign-muted.json"
+mkdir -p "$HOME/.claude/rules" "$HOME/.claude/skills" "$HOME/.claude/themes"
+symlink "$DOTFILES/agents/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+for theme in "$DOTFILES"/agents/claude/themes/*.json; do
+  [ -f "$theme" ] || continue
+  symlink "$theme" "$HOME/.claude/themes/$(basename "$theme")"
+done
 
-# Work-specific agent config (Later rules + skills) lives in a separate private repo, cloned to ~/.work-agents.
-[ -x "$HOME/.work-agents/setup.sh" ] && "$HOME/.work-agents/setup.sh"
+# Global Claude settings (model, plugins, effort, tui, auto-memory, theme).
+# Tracked + symlinked so it's shared across machines; per-machine overrides
+# (permissions, etc.) live in the gitignored ~/.claude/settings.local.json.
+symlink "$DOTFILES/agents/claude/settings.json" "$HOME/.claude/settings.json"
+
+symlink "$DOTFILES/agents/rules/00-engineering.md" "$HOME/.claude/rules/00-engineering.md"
+symlink "$DOTFILES/agents/guidelines/karpathy/skills/karpathy-guidelines/SKILL.md" "$HOME/.claude/rules/10-karpathy.md"
+remove_dangling_links "$HOME/.claude/rules"
 
 # Invokable skills: every directory under agents/skills/ is linked automatically.
 # Both Claude Code and OpenCode read ~/.claude/skills, so one link serves both.
@@ -134,10 +199,19 @@ for skill in "$DOTFILES"/agents/skills/*/; do
   symlink "${skill%/}" "$HOME/.claude/skills/$(basename "$skill")"
 done
 
-# Global Claude settings (model, plugins, effort, tui, auto-memory, theme).
-# Tracked + symlinked so it's shared across machines; per-machine overrides
-# (permissions, etc.) live in the gitignored ~/.claude/settings.local.json.
-symlink "$DOTFILES/agents/settings.json" "$HOME/.claude/settings.json"
+link_repo_rules personal "$DOTFILES"
+
+if [ "$PROFILE" = "work" ]; then
+  "$WORK_AGENTS_DIR/setup.sh"
+else
+  if [ -d "$WORK_AGENTS_DIR" ]; then
+    echo "  WARNING: profile is personal — $WORK_AGENTS_DIR is present but ignored; pruning work links"
+  fi
+  manifest_purge work
+  prune_links_into "$HOME/.claude/rules" "$WORK_AGENTS_DIR"
+  prune_links_into "$HOME/.claude/skills" "$WORK_AGENTS_DIR"
+  prune_links_into "$HOME/Documents" "$WORK_AGENTS_DIR"
+fi
 
 # ── OpenCode ──────────────────────────────────────────────────────────────────
 # Config, global AGENTS.md, themes, and oh-my-openagent routing are tracked in
@@ -172,12 +246,16 @@ if [ ! -e "$DOTFILES/themes/active" ]; then
 fi
 
 # ── Raycast ───────────────────────────────────────────────────────────────────
-echo "==> Importing Raycast settings..."
-open -a Raycast "$DOTFILES/raycast/settings.rayconfig" 2>/dev/null || echo "  Raycast not installed — skipping"
+if ! skip_install; then
+  echo "==> Importing Raycast settings..."
+  open -a Raycast "$DOTFILES/raycast/settings.rayconfig" 2>/dev/null || echo "  Raycast not installed — skipping"
+fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
 echo "Done. Manual steps remaining:"
+echo ""
+echo "  0. Restart OpenCode / Claude Code so the new rules load; Claude asks once per repo to allow external imports."
 echo ""
 echo "  1. GPG key — each machine has its own key. Generate a fresh one:"
 echo "       gpg --full-generate-key"

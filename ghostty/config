@@ -7,4 +7,4 @@ window-padding-y = 8
 
 macos-option-as-alt = true
 background-opacity = 0.95
-working-directory = /Users/trenton.willard/Development
+working-directory = ~/Development

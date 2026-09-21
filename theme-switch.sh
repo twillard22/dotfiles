@@ -63,7 +63,7 @@ if [ -n "$VSCODE_THEME" ]; then
   echo "  vscode     →  $VSCODE_THEME"
 fi
 
-# Claude Code (writes active theme into the tracked agents/settings.json, which is
+# Claude Code (writes active theme into the tracked agents/claude/settings.json, which is
 # symlinked to ~/.claude/settings.json — edit the repo file so the symlink stays intact)
 case "$THEME" in
   neon-sign)        CLAUDE_THEME="neon-sign" ;;
@@ -71,7 +71,7 @@ case "$THEME" in
   *) echo "  WARNING: no Claude Code mapping for $THEME — skipping"; CLAUDE_THEME="" ;;
 esac
 if [ -n "$CLAUDE_THEME" ]; then
-  CLAUDE_SETTINGS="$DOTFILES/agents/settings.json"
+  CLAUDE_SETTINGS="$DOTFILES/agents/claude/settings.json"
   if [ -f "$CLAUDE_SETTINGS" ]; then
     sed -i '' "s|\"theme\": \".*\"|\"theme\": \"custom:$CLAUDE_THEME\"|" "$CLAUDE_SETTINGS"
     echo "  claude     →  $CLAUDE_THEME"
@@ -80,9 +80,9 @@ if [ -n "$CLAUDE_THEME" ]; then
   fi
 fi
 
-# OpenCode (writes active theme into the tracked agents/opencode/tui.json, which is
-# symlinked to ~/.config/opencode/tui.json — theme names match the files in
-# agents/opencode/themes/; OpenCode picks the change up on next launch)
+# OpenCode (~/.config/opencode/tui.json is a plugin-managed copy, not a symlink — see
+# setup.sh — so write both it and the tracked template agents/opencode/tui.json; theme
+# names match the files in agents/opencode/themes/; OpenCode picks the change up on next launch)
 case "$THEME" in
   neon-sign)        OPENCODE_THEME="neon-sign" ;;
   neon-sign-muted)  OPENCODE_THEME="neon-sign-muted" ;;
