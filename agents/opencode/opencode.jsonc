@@ -10,12 +10,14 @@
   // agents/opencode/omo.jsonc (symlinked to ~/.omo/omo.jsonc).
   "model": "anthropic/claude-fable-5-1",
 
-  // Always-loaded guidelines. OpenCode does not parse Claude's `@path` includes, so
-  // anything CLAUDE.md used to include goes here. Absolute paths: `~` expansion in
-  // this array is not documented.
+  // Rules loaded by both tools. `~/` is expanded by OpenCode (1.18.30, session/instruction.ts).
+  // Relative globs are evaluated at every directory from cwd up to the git root, so
+  // `<repo>/.claude/rules/*.md` and `<repo>/.opencode/rules/*.md` load when working inside a repo.
+  // Symlinked `.md` files match; `.local.md` stubs are git-ignored per-repo private notes.
   "instructions": [
-    "/Users/trenton.willard/.dotfiles/agents/guidelines/karpathy/skills/karpathy-guidelines/SKILL.md",
-    "/Users/trenton.willard/.work-agents/agents/opencode/*.md"
+    "~/.claude/rules/*.md",
+    ".claude/rules/*.md",
+    ".opencode/rules/*.md"
   ],
 
   "provider": {
