@@ -74,6 +74,18 @@
     }
   },
 
+  // Remote MCP servers mirroring the claude.ai connectors. Linear and Notion use OAuth
+  // with dynamic client registration; run `opencode mcp auth <name>` once, tokens land
+  // in ~/.local/share/opencode/mcp-auth.json (never in this repo).
+  // Figma's remote server (mcp.figma.com) only accepts allowlisted clients, so it goes
+  // through the Desktop app's local Dev Mode server instead: Figma Desktop → Dev Mode →
+  // Cmd+K → "Enable Dev Mode MCP server". No auth; needs a Dev or Full seat.
+  "mcp": {
+    "linear": {"type": "remote", "url": "https://mcp.linear.app/mcp"},
+    "notion": {"type": "remote", "url": "https://mcp.notion.com/mcp"},
+    "figma": {"type": "remote", "url": "http://127.0.0.1:3845/mcp", "oauth": false}
+  },
+
   // Durable allow-list distilled from ~/.claude/**/settings.local.json. Last matching
   // rule wins, so the catch-all comes first. Project-specific one-offs (xcodebuild
   // invocations, perl rewrites) were deliberately not carried over.

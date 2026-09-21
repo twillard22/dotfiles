@@ -2,8 +2,8 @@
 
 OpenCode is the primary coding agent on this machine. Claude Code stays installed for
 two jobs it alone can do: publishing claude.ai Artifacts (see the `claude-artifact`
-skill) and the claude.ai connectors that have no public MCP endpoint (Figma, Gmail,
-Calendar, Drive, Amplitude).
+skill) and the claude.ai connectors that have no public MCP endpoint (Gmail,
+Calendar, Drive, Amplitude; Figma's remote server is allowlisted, see below).
 
 ## Layout and ownership
 
@@ -115,7 +115,11 @@ file such as `~/.secrets/<name>` sourced from the shell, or use `{file:~/.secret
 Known public endpoints: Linear `https://mcp.linear.app/mcp`, Notion
 `https://mcp.notion.com/mcp`, Slack `https://mcp.slack.com/mcp`, GitHub
 `https://api.githubcopilot.com/mcp/`, Supabase `https://mcp.supabase.com/mcp`.
-Figma's endpoint is restricted to catalogued clients and does not accept OpenCode.
+Figma's remote endpoint (`https://mcp.figma.com/mcp`) is allowlisted to catalogued
+clients: its registration endpoint issues a client ID, then the authorize page says
+"OAuth app with client id … doesn't exist". Use the Desktop app's local Dev Mode
+server (`http://127.0.0.1:3845/mcp`, `"oauth": false`) instead; enable it in Figma
+Desktop via Dev Mode → Cmd+K → "Enable Dev Mode MCP server".
 
 ## Add or tune a model
 
