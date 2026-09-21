@@ -15,12 +15,16 @@ Later-related, derived from a colleague's setup, or uncertain → `~/.work-agent
 |---|---|---|---|
 | Config: plugins, default model, providers, instructions, permissions | `agents/opencode/opencode.jsonc` | `~/.config/opencode/opencode.jsonc` | dotfiles |
 | TUI options (theme) | `agents/opencode/tui.json` (template) | copied once to `~/.config/opencode/tui.json`; the plugin rewrites that file, so it is not a link. `theme-switch` updates both. | dotfiles |
-| Global rules | `agents/opencode/AGENTS.md` | `~/.config/opencode/AGENTS.md` | dotfiles |
+| Thin OpenCode notes (pointer to the rules dir, not rules) | `agents/opencode/AGENTS.md` | `~/.config/opencode/AGENTS.md` | dotfiles |
+| Generic rules | `agents/rules/00-engineering.md` | `~/.claude/rules/00-engineering.md`, loaded via `instructions` | dotfiles |
+| Karpathy guideline | `agents/guidelines/karpathy/` (submodule) | `~/.claude/rules/10-karpathy.md`, loaded via `instructions` | dotfiles |
 | oh-my-openagent routing | `agents/opencode/omo.jsonc` | `~/.omo/omo.jsonc` | dotfiles |
 | Themes | `agents/opencode/themes/*.json` | `~/.config/opencode/themes/` | dotfiles |
 | Generic skills | `agents/skills/<name>/` | `~/.claude/skills/<name>` | dotfiles |
-| Later rules (private) | `~/.work-agents/agents/opencode/*.md` | loaded via `instructions` glob | work-agents |
+| Later rules (private) | `~/.work-agents/agents/rules/50-later.md` | `~/.claude/rules/50-later.md`, loaded via `instructions` (work profile only) | work-agents |
+| Per-repo private notes | `<layer>/agents/repos/<name>/{location,rules.md}` | `<repo>/.claude/rules/<layer>.local.md` (real stub, `@~/...` import) + `<repo>/.opencode/rules/<layer>.local.md` (symlink), both loaded via `instructions` | dotfiles or work-agents |
 | Later skills | `~/.work-agents/agents/skills/<name>/` | `~/.claude/skills/<name>` | work-agents |
+| Employer org skills | employer's shared skills repo (external) | copied (not symlinked) into `~/.claude/skills/<name>` by `~/.work-agents/setup.sh` | work-agents |
 | Provider keys | `~/.local/share/opencode/auth.json` | written by `opencode auth login` | machine only |
 | MCP OAuth tokens | `~/.local/share/opencode/mcp-auth.json` | written by `opencode mcp auth` | machine only |
 | Plugin install output | `~/.config/opencode/node_modules`, `package*.json` | untracked | machine only |
@@ -31,21 +35,34 @@ adding anything.
 
 ## How instructions load
 
-1. Project `AGENTS.md` or `CLAUDE.md`, walking up from the cwd to the repo root. The
-   mavely-native, mavely-next, and link-creator-extension repos already have one.
-2. `~/.config/opencode/AGENTS.md` (the global rules above).
-3. `~/.claude/CLAUDE.md` only as a fallback when 2 is absent. It is present, so
-   CLAUDE.md is Claude-Code-only now.
-4. Everything in the `instructions` array of `opencode.jsonc` is merged in: the
-   Karpathy guideline and the private Later rules glob. Globs that match nothing are
-   fine, so a machine without work-agents still starts.
+Both tools read the same merged rules directory, `~/.claude/rules/*.md`: Claude Code reads it
+natively, OpenCode via the `instructions` array in `opencode.jsonc`:
 
-OpenCode does not parse Claude's `@path` includes. A guideline that must load
-everywhere goes in `instructions`, not in an `@` line.
+```jsonc
+"instructions": [
+  "~/.claude/rules/*.md",
+  ".claude/rules/*.md",
+  ".opencode/rules/*.md"
+]
+```
 
-There is no memory system. A rule that should survive goes into an AGENTS.md: the
-global one for universal behaviour, the private Later file for team rules, the repo's
-for code conventions. "Make a note" means exactly that edit.
+`~/.claude/rules/*.md` picks up everything `setup.sh` links there: `00-engineering.md`
+(generic), `10-karpathy.md` (submodule), and — on the work profile — `50-later.md`. The two
+relative globs are evaluated at every directory from the cwd up to the git root, so a repo's
+own `.claude/rules/*.md` and `.opencode/rules/*.md` load too, including a repo's own
+`AGENTS.md`/`CLAUDE.md` walking up from the cwd. Globs that match nothing are fine, so a
+machine without `~/.work-agents` still starts.
+
+Per-repo private notes show up as `<repo>/.claude/rules/<layer>.local.md`, a real one-line
+`@~/<layer-repo>/agents/repos/<name>/rules.md` stub. OpenCode has no `@` import syntax, so it
+ignores that line's content — but the matching `<repo>/.opencode/rules/<layer>.local.md`
+symlink in the same `instructions` glob carries the actual note, so nothing is lost. Restart
+OpenCode after any change to `opencode.jsonc` or the rules it loads.
+
+There is no memory system. A rule that should survive goes into the owning layer's rules
+file — `agents/rules/00-engineering.md` (this repo, generic), `~/.work-agents/agents/rules/
+50-later.md` (work), `<layer>/agents/repos/<name>/rules.md` (private per-repo), or
+`<repo>/AGENTS.md` (team-visible). "Make a note" means exactly that edit.
 
 ## Add a generic skill
 
@@ -73,8 +90,8 @@ work-agents.
 ## Add a Later skill
 
 Same steps in `~/.work-agents/agents/skills/<name>/`. Its `setup.sh` links every
-directory automatically. Commit there. Skills that mature are promoted to
-`the employer's shared skills repo`.
+directory automatically. Commit there. Skills that mature are promoted to the
+employer's shared skills repo.
 
 ## Add a project skill
 
@@ -117,17 +134,18 @@ Linear API key on disk; use the OAuth MCP server.
 ## First-run checklist
 
 ```bash
-opencode auth login                    # Anthropic (platform API key)
-opencode auth login                    # OpenAI (platform API key)
-opencode models anthropic              # confirm claude-fable-5-1, claude-sonnet-5, claude-haiku-4-5
-opencode models openai                 # confirm gpt-5.6, gpt-6-astra; edit both .jsonc files if names differ
+~/.dotfiles/setup.sh --profile work      # links rules, skills, per-repo stubs; installs the org skill
+opencode auth login                      # Anthropic (platform API key)
+opencode auth login                      # OpenAI (platform API key)
+opencode models anthropic                # confirm claude-fable-5-1, claude-sonnet-5, claude-haiku-4-5
+opencode models openai                   # confirm gpt-5.6, gpt-6-astra; edit both .jsonc files if names differ
 cd <any work repo> && opencode
 ```
 
 In the session: `/models` should show only the configured models; ask "what skills
-are available?" and expect `claude-artifact`, `work skills`, `zsh`,
-`work skills`; run a trivial task with `ultrawork` and watch which agents and models
-fire.
+are available?" and expect `claude-artifact` plus every skill linked from
+`~/.work-agents`; run a trivial task with `ultrawork` and
+watch which agents and models fire.
 
 ## omo migration error
 

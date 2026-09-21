@@ -1,6 +1,7 @@
 # dotfiles
 
-Personal dev environment — shell, git, mise, Homebrew packages, VSCode, Neovim, and Claude Code config.
+Personal dev environment — shell, git, mise, Homebrew packages, VSCode, Neovim, and agent config
+for OpenCode (primary) and Claude Code (secondary).
 
 ## Structure
 
@@ -49,20 +50,26 @@ Personal dev environment — shell, git, mise, Homebrew packages, VSCode, Neovim
       zsh-autosuggest.zsh
     NEW-THEME.md         ← template: paste into claude.ai to generate a new theme
   agents/                ← tool-neutral agent config (OpenCode is primary, Claude Code secondary)
+    lib.sh               ← shared shell helpers, sourced by this repo's setup.sh and ~/.work-agents/setup.sh
+    rules/
+      00-engineering.md  ← generic rules, symlinked to ~/.claude/rules/00-engineering.md
+    guidelines/          ← submodules linked into ~/.claude/rules/ under a numbered name
+      karpathy/          ← submodule: github.com/multica-ai/andrej-karpathy-skills → ~/.claude/rules/10-karpathy.md
+    skills/              ← invokable skills; every dir is symlinked to ~/.claude/skills/ (both tools read it)
+    repos/               ← per-repo private notes; see agents/repos/README.md
+    claude/
+      CLAUDE.md          ← symlinked to ~/.claude/CLAUDE.md (Claude Code only)
+      settings.json      ← symlinked to ~/.claude/settings.json (Claude Code only)
+      themes/            ← Claude Code theme JSONs, symlinked to ~/.claude/themes/
     opencode/            ← see agents/opencode/README.md for the full how-to
       opencode.jsonc     ← symlinked to ~/.config/opencode/opencode.jsonc (providers, instructions, permissions)
-      tui.json           ← symlinked to ~/.config/opencode/tui.json (theme)
-      AGENTS.md          ← symlinked to ~/.config/opencode/AGENTS.md (global rules)
+      tui.json           ← template, copied once to ~/.config/opencode/tui.json (plugin rewrites it, so not a link)
+      AGENTS.md          ← thin file, symlinked to ~/.config/opencode/AGENTS.md — rules live in ~/.claude/rules
       omo.jsonc          ← symlinked to ~/.omo/omo.jsonc (oh-my-openagent model routing)
       themes/            ← OpenCode theme JSONs, symlinked to ~/.config/opencode/themes/
       skill-template/    ← copy to start a new skill
-    skills/              ← invokable skills; every dir is symlinked to ~/.claude/skills/ (both tools read it)
-    guidelines/          ← always-loaded guidelines (OpenCode: `instructions` in opencode.jsonc; Claude: @path)
-      karpathy/          ← submodule: github.com/multica-ai/andrej-karpathy-skills
-    CLAUDE.md            ← symlinked to ~/.claude/CLAUDE.md (Claude Code only)
-    settings.json        ← symlinked to ~/.claude/settings.json (Claude Code only)
-    themes/              ← Claude Code theme JSONs, symlinked to ~/.claude/themes/
-  design-todo.md         ← tasks requiring claude.ai design credits to complete
+  tests/
+    setup-profiles.test.sh ← profile-gated setup.sh behaviour, run against a scratch HOME
 ```
 
 ## New machine setup
@@ -88,16 +95,21 @@ git clone --recurse-submodules https://github.com/twillard22/dotfiles ~/.dotfile
 ### 3. Run setup.sh
 
 ```bash
-cd ~/.dotfiles && ./setup.sh
+cd ~/.dotfiles && ./setup.sh --profile personal
+# or: ./setup.sh --profile work
 ```
 
-After the first run, the `dotfiles` alias is available in your shell — run `dotfiles` from anywhere to re-run setup.
+After the first run, the `dotfiles` alias is available in your shell, and the profile is saved —
+run `dotfiles` (bare, no flag) from anywhere to re-run setup with the same profile. See
+`## Profiles` below for what each profile does.
 
 This will:
 - Install Homebrew (if not present)
 - Install all packages from `Brewfile` (`brew bundle`) including starship, zsh plugins, neovim, lazygit, and Fira Code Nerd Font
 - Run `git lfs install`
 - Symlink `.zshrc`, `.gitconfig`, `mise/config.toml`, `starship.toml`, `ghostty/config`, `nvim/`, VSCode `settings.json`, and Claude config
+- Link `~/.claude/rules/` (`00-engineering.md`, `10-karpathy.md`, and — on the work profile —
+  `50-later.md`) and wire per-repo private-notes stubs via `agents/repos/`
 - Seed `~/.local/state/nvim/theme` with `neon-sign-muted` (nvim reads this on startup to pick the active colorscheme)
 - Configure `~/.gnupg/gpg-agent.conf` to use `pinentry-mac`
 - Run `mise install` (node, bun, pnpm, ruby, yarn)
@@ -182,6 +194,71 @@ Full details, first-run checklist, and the artifact smoke test: `agents/opencode
 
 ---
 
+## Profiles
+
+`setup.sh` is profile-gated. The chosen profile is saved to `~/.config/agents/profile`, so a
+bare `./setup.sh` (or the `dotfiles` alias) reuses it — it exits 1 if no profile has been saved
+yet.
+
+- **`--profile personal`** — links only this repo's rules, skills, and themes. It is a hard
+  gate: even if `~/.work-agents` is present on disk, personal setup ignores it, purges
+  `~/.config/agents/manifest.work` (see below), prunes any existing symlink under
+  `~/.claude/rules`, `~/.claude/skills`, or `~/Documents` that resolves into `~/.work-agents`,
+  prints a warning if `~/.work-agents` exists, and exits 0.
+- **`--profile work`** — requires `~/.work-agents/setup.sh` to exist and be executable; exits 1
+  naming the clone command otherwise. On success it calls that script, which links the Later
+  rules, skills, per-repo stubs, and Documents symlinks described in
+  `~/.work-agents/README.md`.
+
+**The manifest.** Everything `~/.work-agents/setup.sh` creates that is not a plain symlink
+resolving into `~/.work-agents` — the real one-line per-repo stub files, their paired OpenCode
+symlinks, and any org skill (copied, not symlinked, by the `skills`
+CLI) — gets recorded, one absolute path per line, in `~/.config/agents/manifest.work`.
+Switching to `--profile personal` reads that manifest and removes every path it lists, then
+deletes the manifest itself. That's how the copied org skill and the per-repo stubs — which
+`prune_links_into` can't find because they aren't symlinks into `~/.work-agents` — get cleaned
+up on a personal machine.
+
+`DOTFILES_SKIP_INSTALL=1 ./setup.sh --profile personal` skips Homebrew, mise, GPG, `code`, and
+Raycast — the tests use this to run setup against a scratch `HOME` without touching real
+machine state.
+
+## How rules load
+
+Both tools read the same merged rules directory, `~/.claude/rules/`: Claude Code natively,
+OpenCode via the `instructions` globs in `agents/opencode/opencode.jsonc`.
+
+| File | Claude Code | OpenCode | Owner |
+|---|---|---|---|
+| `<repo>/AGENTS.md` | reads it walking up from cwd | reads it walking up from cwd | the repo (team-visible) |
+| `<repo>/.claude/rules/*.md` | reads it | reads via `.claude/rules/*.md` glob | the repo |
+| `~/.claude/rules/00-engineering.md` | reads the directory natively | reads via `~/.claude/rules/*.md` glob | dotfiles (`agents/rules/`) |
+| `~/.claude/rules/10-karpathy.md` | same | same | dotfiles (`agents/guidelines/karpathy/` submodule) |
+| `~/.claude/rules/50-later.md` | same (work profile only) | same (work profile only) | work-agents |
+| `<repo>/.claude/rules/<layer>.local.md` + `<repo>/.opencode/rules/<layer>.local.md` | follows the `@~/...` import in the `.claude` stub | reads the `.opencode` copy directly | per-repo private notes (see below) |
+
+## Per-repo private notes
+
+A note that's true for one repo but not worth committing to that repo lives at
+`agents/repos/<name>/{location,rules.md}` in the owning layer — personal notes here, work notes
+in `~/.work-agents/agents/repos/<name>/`. `location` is a single `~/`-relative path to the
+repo; `rules.md` is the note itself.
+
+`setup.sh` turns each entry into two files inside the target repo: `.claude/rules/<layer>.local.md`,
+a real file containing exactly one line, `@~/<layer-repo>/agents/repos/<name>/rules.md`, which
+Claude Code follows as an import; and `.opencode/rules/<layer>.local.md`, a symlink to the same
+`rules.md`, which OpenCode reads directly. Both are matched by the global gitignore, so they
+never show up as untracked in the repo. The first time Claude Code sees the import line in a
+given repo it asks "Allow external CLAUDE.md file imports?" — answer Yes.
+
+Promote a private note by moving its content into `<repo>/AGENTS.md` and deleting the
+`agents/repos/<name>` entry, then delete the two stubs by hand
+(`rm <repo>/.claude/rules/<layer>.local.md <repo>/.opencode/rules/<layer>.local.md`);
+`setup.sh` only creates stubs, it never removes one for an entry that no longer exists.
+Restart OpenCode and Claude Code after any rules change so they pick up the new files.
+
+---
+
 ## Themes
 
 Themes cover all six tools simultaneously: VS Code, Ghostty, Starship, zsh-syntax-highlighting,
@@ -216,8 +293,8 @@ cp ~/Development/neon-sign/zsh/neon-sign-muted-highlights.zsh ~/.dotfiles/themes
 cp ~/Development/neon-sign/zsh/neon-sign-muted-autosuggest.zsh ~/.dotfiles/themes/neon-sign-muted/zsh-autosuggest.zsh
 cp ~/Development/neon-sign/themes/neon-sign.json ~/.dotfiles/vscode-themes/neon-sign/themes/
 cp ~/Development/neon-sign/themes/neon-sign-muted.json ~/.dotfiles/vscode-themes/neon-sign-muted/themes/
-cp ~/Development/neon-sign/claude/neon-sign.json ~/.dotfiles/agents/themes/neon-sign.json
-cp ~/Development/neon-sign/claude/neon-sign-muted.json ~/.dotfiles/agents/themes/neon-sign-muted.json
+cp ~/Development/neon-sign/claude/neon-sign.json ~/.dotfiles/agents/claude/themes/neon-sign.json
+cp ~/Development/neon-sign/claude/neon-sign-muted.json ~/.dotfiles/agents/claude/themes/neon-sign-muted.json
 # Then rebuild VSIXs and commit
 ```
 
@@ -238,8 +315,18 @@ ln -sf ~/.dotfiles/ghostty/themes/<name> ~/.config/ghostty/themes/<name>
 theme-switch <name>
 ```
 
-Or hand the generated files to Claude Code and say "add the `<name>` theme" —
-it knows the full structure and will handle every step.
+`themes/NEW-THEME.md` covers the VS Code, Ghostty, Starship, and zsh files. The agent
+tools need three more steps it does not mention:
+
+- `agents/claude/themes/<name>.json` for Claude Code (`{ "name", "base": "dark", "overrides": {…} }`)
+  and `agents/opencode/themes/<name>.json` in OpenCode's `defs` + `theme` schema (copy an
+  existing one; the two shapes differ).
+- Add `<name>` case entries to the Claude Code and OpenCode blocks in `theme-switch.sh`.
+  Claude Code needs the `custom:` prefix, which the script adds.
+- Drop the file into `agents/claude/themes/` and run `setup.sh` — the themes loop links every
+  file in that directory automatically (same for OpenCode themes) — then `theme-switch <name>`.
+
+Or hand the generated files to an agent and say "add the `<name>` theme".
 
 ### VS Code extension packaging
 
@@ -257,7 +344,8 @@ code --install-extension tw-<name>-1.0.0.vsix
 
 - **theme-switch.sh** updates six things atomically: `themes/active` symlink (zsh),
   `starship/starship.toml` symlink, `ghostty/config` theme line, `vscode/settings.json` colorTheme,
-  `~/.claude/settings.json` theme (written as `custom:<slug>`), and `~/.local/state/nvim/theme`
+  `agents/claude/settings.json` theme (written as `custom:<slug>`, linked to
+  `~/.claude/settings.json`), and `~/.local/state/nvim/theme`
   (nvim reads this state file on startup — running instances pick it up on next open)
 - **zshrc** sources `themes/active/zsh-autosuggest.zsh` and `themes/active/zsh-highlights.zsh`
   before the plugin sources, so the active theme's colors are always loaded
@@ -275,27 +363,22 @@ brew install <package>
 # Add it to Brewfile manually, then commit
 ```
 
-### Adding an always-loaded guideline
+### Adding an always-loaded rule
 
-OpenCode loads guidelines from the `instructions` array in `agents/opencode/opencode.jsonc`
-(absolute paths or globs). Claude Code loads them via `@path` lines at the top of
-`agents/CLAUDE.md`. Add to both while both tools are installed.
-
-**From an external repo (submodule):**
-```bash
-cd ~/.dotfiles
-git submodule add <url> agents/guidelines/<name>
-# Add the absolute path to `instructions` in agents/opencode/opencode.jsonc
-# Add @guidelines/<name>/path/to/SKILL.md to agents/CLAUDE.md
-git add -A && git commit -m "add <name> guideline"
-```
+Both tools read `~/.claude/rules/` (Claude Code natively, OpenCode via the `instructions`
+globs in `agents/opencode/opencode.jsonc`), so there's one place to add a rule, not two.
 
 **As a plain file:**
 ```bash
-# Create agents/guidelines/<name>.md
-# Add @guidelines/<name>.md to agents/CLAUDE.md
-git add -A && git commit -m "add <name> guideline"
+# Create agents/rules/NN-name.md (NN keeps load order predictable; 00-engineering.md is generic)
+# Add one line to setup.sh's Claude section:
+#   symlink "$DOTFILES/agents/rules/NN-name.md" "$HOME/.claude/rules/NN-name.md"
+git add -A && git commit -m "add NN-name rule"
 ```
+
+**From an external repo (submodule):** add it under `agents/guidelines/<name>/` and link its
+`SKILL.md` (or equivalent) into `~/.claude/rules/NN-name.md` the same way — see how
+`agents/guidelines/karpathy/` is wired to `10-karpathy.md` in `setup.sh`.
 
 ### Adding an invokable skill
 
@@ -315,3 +398,14 @@ Later-specific skills go in `~/.work-agents/agents/skills/` instead (private rep
 ```bash
 cd ~/.dotfiles && git submodule update --remote && git commit -am "update guidelines"
 ```
+
+## Testing
+
+```bash
+bash tests/setup-profiles.test.sh
+```
+
+Runs `setup.sh` repeatedly against a scratch `HOME` (`DOTFILES_SKIP_INSTALL=1`, real machine
+state untouched) covering both profiles, the personal hard gate, idempotency, and — when
+`~/.work-agents` exists on this machine — the real work `setup.sh`. Prints `PASS <name>` per
+scenario and `ALL PASS` at the end; any failure exits 1 with `FAIL <name>: <reason>`.
