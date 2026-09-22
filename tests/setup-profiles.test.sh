@@ -73,6 +73,7 @@ plant_fixture() {
   mkdir -p \
     "$WORK_AGENTS_DIR/agents/rules" \
     "$WORK_AGENTS_DIR/agents/skills/fx-skill" \
+    "$WORK_AGENTS_DIR/agents/skills/fx-mcp" \
     "$WORK_AGENTS_DIR/agents/repos/fxrepo" \
     "$WORK_AGENTS_DIR/planning" \
     "$WORK_AGENTS_DIR/todo"
@@ -82,6 +83,16 @@ plant_fixture() {
 ---
 name: fx-skill
 description: fixture
+---
+EOF
+  cat > "$WORK_AGENTS_DIR/agents/skills/fx-mcp/SKILL.md" <<'EOF'
+---
+name: fx-mcp
+description: fixture with an embedded MCP server
+mcp:
+  fx:
+    type: http
+    url: https://example.invalid/mcp
 ---
 EOF
   printf '%s\n' '# fxrepo private notes' > "$WORK_AGENTS_DIR/agents/repos/fxrepo/rules.md"
@@ -94,6 +105,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p "$HOME/.claude/rules" "$HOME/.claude/skills" "$HOME/Documents"
 for f in "$ROOT"/agents/rules/*.md; do symlink "$f" "$HOME/.claude/rules/$(basename "$f")"; done
 for s in "$ROOT"/agents/skills/*/; do symlink "${s%/}" "$HOME/.claude/skills/$(basename "$s")"; done
+mkdir -p "$HOME/.config/opencode/skills"
+for s in "$ROOT"/agents/skills/*/; do grep -q '^mcp:' "${s}SKILL.md" && symlink "${s%/}" "$HOME/.config/opencode/skills/$(basename "$s")"; done
 link_repo_rules work "$ROOT"
 mkdir -p "$HOME/.claude/skills/fx-copied" && printf -- '---\nname: fx-copied\ndescription: fixture copy\n---\n' > "$HOME/.claude/skills/fx-copied/SKILL.md" && manifest_add work "$HOME/.claude/skills/fx-copied"
 for d in planning todo; do [ -d "$ROOT/$d" ] && symlink "$ROOT/$d" "$HOME/Documents/$d"; done
@@ -116,6 +129,11 @@ assert_work_state() {
     fail "$scenario" "50-later.md does not point into the work fixture"
   [ "$(readlink "$HOME/.claude/skills/fx-skill" 2>/dev/null)" = "$WORK_AGENTS_DIR/agents/skills/fx-skill" ] ||
     fail "$scenario" "fx-skill does not point into the work fixture"
+  [ "$(readlink "$HOME/.config/opencode/skills/fx-mcp" 2>/dev/null)" = "$WORK_AGENTS_DIR/agents/skills/fx-mcp" ] ||
+    fail "$scenario" "fx-mcp is not linked into ~/.config/opencode/skills"
+  if [ -e "$HOME/.config/opencode/skills/fx-skill" ] || [ -L "$HOME/.config/opencode/skills/fx-skill" ]; then
+    fail "$scenario" "fx-skill (no mcp block) was linked into ~/.config/opencode/skills"
+  fi
   [ -f "$claude_stub" ] || fail "$scenario" "Claude work rules stub is missing"
   [ ! -L "$claude_stub" ] || fail "$scenario" "Claude work rules stub is a symlink"
   [ "$(cat "$claude_stub")" = '@~/.work-agents/agents/repos/fxrepo/rules.md' ] ||

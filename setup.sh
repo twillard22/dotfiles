@@ -210,6 +210,7 @@ else
   manifest_purge work
   prune_links_into "$HOME/.claude/rules" "$WORK_AGENTS_DIR"
   prune_links_into "$HOME/.claude/skills" "$WORK_AGENTS_DIR"
+  prune_links_into "$HOME/.config/opencode/skills" "$WORK_AGENTS_DIR"
   prune_links_into "$HOME/Documents" "$WORK_AGENTS_DIR"
 fi
 
