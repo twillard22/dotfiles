@@ -121,6 +121,58 @@ clients: its registration endpoint issues a client ID, then the authorize page s
 server (`http://127.0.0.1:3845/mcp`, `"oauth": false`) instead; enable it in Figma
 Desktop via Dev Mode → Cmd+K → "Enable Dev Mode MCP server".
 
+**Every server listed here costs its full tool-schema size on every turn of every
+session**, used or not. Measure before adding: `tools/list` on Notion is ~63K tokens,
+Linear ~28K, Figma Desktop ~5K. Anything over a few K tokens that is not needed in most
+sessions goes behind a skill instead: keep the `opencode.jsonc` entry with
+`"enabled": false` (so `opencode mcp list` still shows it) and declare the server in the
+skill's frontmatter — see `~/.work-agents/agents/skills/linear/SKILL.md`:
+
+```yaml
+mcp:
+  linear:
+    type: http
+    url: https://mcp.linear.app/mcp
+    oauth: {}
+```
+
+oh-my-openagent connects it when the skill is loaded, appends the tool list to the skill
+body, and the model calls tools via `skill_mcp(mcp_name=…, tool_name=…)`. Its OAuth
+tokens live in `~/.config/opencode/mcp-oauth/` (first use opens a browser), separate from
+`opencode mcp auth`. The skill `description` is what triggers the load, so write it as
+the phrases that mean "this session needs Linear".
+
+## Cost review
+
+The fixed per-turn context is the cost lever: it is written to cache on turn 1 and
+re-read on every later turn, for the orchestrator and for every sub-agent that inherits
+it. Review weekly with:
+
+```bash
+opencode stats --days 7 --models
+# first-turn context (cache write) per session, newest first
+sqlite3 ~/.local/share/opencode/opencode.db "select substr(s.title,1,40), json_extract(m.data,'\$.modelID'), json_extract(m.data,'\$.tokens.cache.write'), round(json_extract(m.data,'\$.cost'),2), date(m.time_created/1000,'unixepoch') from session s join message m on m.session_id=s.id where s.parent_id is null and json_extract(m.data,'\$.role')='assistant' and json_extract(m.data,'\$.tokens.cache.write')>0 group by s.id having m.time_created=min(m.time_created) order by m.time_created desc limit 20;"
+```
+
+Baseline, 2026-09-22 (7 days ending that day, before the change below): 36 sessions,
+$278.82 total, $39.83/day, Fable $260 (93%), 267M cache-read tokens vs 16.4M cache-write.
+A Fable session in mavely-native opened at **205K tokens / $2.58** before the first reply;
+~92K of that was Notion + Linear tool schemas, ~10K duplicate and plugin skills.
+
+Change on 2026-09-22: Linear and Notion moved behind skills (above), Claude Code compat
+skill loader and the figma/supabase Claude Code plugins turned off in `omo.jsonc`.
+Same-model A/B with a fresh `opencode run` in mavely-native: **152K → 48K tokens**
+(haiku). First real Fable session on the new setup ("Initial influx testing",
+2026-09-22 10:55): **67,793 tokens / $0.85**, down from 204,842 / $2.58.
+
+Review on or after 2026-09-29 (ask: "we changed the MCP/skill loading on 09-22, compare
+the stats"): rerun the two commands and compare against the baseline above. Expect Fable
+sessions to open near 70K and Avg Cost/Day well under $40 for a comparable week; note that
+`--days 7` on 09-29 straddles the change, so prefer `--days 6` or compare per-session
+first-turn writes before/after 09-22. If spend is still dominated by Fable cache reads, the
+next lever is `sisyphus` → `anthropic/claude-sonnet-5` in `omo.jsonc` (orchestrator only;
+keep Fable on `prometheus`).
+
 ## Add or tune a model
 
 1. Add the model under `provider.<id>.models.<model-id>` in `opencode.jsonc`, with

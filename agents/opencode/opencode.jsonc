@@ -80,9 +80,13 @@
   // Figma's remote server (mcp.figma.com) only accepts allowlisted clients, so it goes
   // through the Desktop app's local Dev Mode server instead: Figma Desktop → Dev Mode →
   // Cmd+K → "Enable Dev Mode MCP server". No auth; needs a Dev or Full seat.
+  // Linear and Notion are disabled at startup on purpose: their tool schemas are ~92K
+  // tokens (Notion 63K, Linear 28K), re-sent on every turn. They load lazily through
+  // the skill-embedded MCPs in ~/.work-agents/agents/skills/{linear,notion} instead,
+  // so the cost lands only in sessions that use them. See README → "Cost review".
   "mcp": {
-    "linear": {"type": "remote", "url": "https://mcp.linear.app/mcp"},
-    "notion": {"type": "remote", "url": "https://mcp.notion.com/mcp"},
+    "linear": {"type": "remote", "url": "https://mcp.linear.app/mcp", "enabled": false},
+    "notion": {"type": "remote", "url": "https://mcp.notion.com/mcp", "enabled": false},
     "figma": {"type": "remote", "url": "http://127.0.0.1:3845/mcp", "oauth": false}
   },
 

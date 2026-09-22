@@ -10,6 +10,18 @@
   // new migration id and that error returns, see README.md → "omo migration error".
   "_migrations": ["2026-07-opencode-config-unification", "2026-08-reasoning-unification"],
   "[opencode]": {
+    // Claude Code compat layer. OpenCode already loads ~/.claude/skills natively, so the
+    // compat skill loader only added duplicates (`synced/<uuid>/docx` next to `docx`).
+    // The figma/supabase Claude Code plugins added 15 skills and a stale remote Figma
+    // MCP that can never auth (see README → "Add an MCP server"). Both are context
+    // bloat with no OpenCode-side use; re-enable per key if that changes.
+    "claude_code": {
+      "skills": false,
+      "plugins_override": {
+        "figma@claude-plugins-official": false,
+        "supabase@claude-plugins-official": false
+      }
+    },
     "agents": {
       // Orchestrator: plans, delegates, talks to the user. Its context is re-sent every
       // turn, so it is the cost lever. Fable by choice; drop to sonnet if spend balloons.
