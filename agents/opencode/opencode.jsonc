@@ -77,17 +77,24 @@
   // Remote MCP servers mirroring the claude.ai connectors. Linear and Notion use OAuth
   // with dynamic client registration; run `opencode mcp auth <name>` once, tokens land
   // in ~/.local/share/opencode/mcp-auth.json (never in this repo).
-  // Figma's remote server (mcp.figma.com) only accepts allowlisted clients, so it goes
-  // through the Desktop app's local Dev Mode server instead: Figma Desktop → Dev Mode →
-  // Cmd+K → "Enable Dev Mode MCP server". No auth; needs a Dev or Full seat.
-  // Linear and Notion are disabled at startup on purpose: their tool schemas are ~92K
-  // tokens (Notion 63K, Linear 28K), re-sent on every turn. They load lazily through
-  // the skill-embedded MCPs in ~/.work-agents/agents/skills/{linear,notion} instead,
-  // so the cost lands only in sessions that use them. See README → "Cost review".
+  // Figma: neither official server takes an API key (remote is OAuth + allowlisted
+  // clients, Desktop has no auth and needs the file open in the app), so `figma` is the
+  // Framelink server (figma-developer-mcp) over the REST API with a read-only personal
+  // access token in ~/.secrets/figma (untracked).
+  // Linear, Notion and Figma are disabled at startup on purpose: their tool schemas
+  // (Notion 63K, Linear 28K, Figma 1K tokens) would be re-sent on every turn. They load
+  // lazily through the skill-embedded MCPs in ~/.work-agents/agents/skills/{linear,
+  // notion,figma} instead, so the cost lands only in sessions that use them. The entries
+  // stay here so `opencode mcp list` documents them. See README → "Cost review".
   "mcp": {
     "linear": {"type": "remote", "url": "https://mcp.linear.app/mcp", "enabled": false},
     "notion": {"type": "remote", "url": "https://mcp.notion.com/mcp", "enabled": false},
-    "figma": {"type": "remote", "url": "http://127.0.0.1:3845/mcp", "oauth": false}
+    "figma": {
+      "type": "local",
+      "command": ["npx", "-y", "figma-developer-mcp@0.13.2", "--stdio"],
+      "environment": {"FIGMA_API_KEY": "{file:~/.secrets/figma}"},
+      "enabled": false
+    }
   },
 
   // Durable allow-list distilled from ~/.claude/**/settings.local.json. Last matching

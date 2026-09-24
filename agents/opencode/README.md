@@ -117,9 +117,18 @@ Known public endpoints: Linear `https://mcp.linear.app/mcp`, Notion
 `https://api.githubcopilot.com/mcp/`, Supabase `https://mcp.supabase.com/mcp`.
 Figma's remote endpoint (`https://mcp.figma.com/mcp`) is allowlisted to catalogued
 clients: its registration endpoint issues a client ID, then the authorize page says
-"OAuth app with client id … doesn't exist". Use the Desktop app's local Dev Mode
-server (`http://127.0.0.1:3845/mcp`, `"oauth": false`) instead; enable it in Figma
-Desktop via Dev Mode → Cmd+K → "Enable Dev Mode MCP server".
+"OAuth app with client id … doesn't exist". Neither official server accepts a personal
+access token, so `figma` is the Framelink server (`figma-developer-mcp`, stdio) over
+the REST API with a read-only token in `~/.secrets/figma` (`chmod 600`, one line). Its
+two tools (`get_figma_data`, `download_figma_images`) take a file key + node id from any
+Figma URL; no open Desktop app required, no generated code or screenshots either. Like
+Linear and Notion it is `enabled: false` here and loads through the `figma` skill in
+`~/.work-agents/agents/skills/figma`; that skill's frontmatter wraps the command in
+`sh -c 'FIGMA_API_KEY="$(cat ~/.secrets/figma)" exec npx …'` because the skill loader
+strips inherited `*_API_KEY` vars and does no `{env:}`/`{file:}` substitution. If
+`get_design_context`/`get_screenshot` are ever needed, the Desktop Dev Mode server is
+`{"type": "remote", "url": "http://127.0.0.1:3845/mcp", "oauth": false}` (Figma Desktop
+→ Dev Mode → Cmd+K → "Enable Dev Mode MCP server", file open; ~5K tokens per turn).
 
 **Every server listed here costs its full tool-schema size on every turn of every
 session**, used or not. Measure before adding: `tools/list` on Notion is ~63K tokens,
