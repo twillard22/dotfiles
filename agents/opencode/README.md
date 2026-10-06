@@ -174,13 +174,70 @@ Same-model A/B with a fresh `opencode run` in mavely-native: **152K → 48K toke
 (haiku). First real Fable session on the new setup ("Initial influx testing",
 2026-09-22 10:55): **67,793 tokens / $0.85**, down from 204,842 / $2.58.
 
-Review on or after 2026-09-29 (ask: "we changed the MCP/skill loading on 09-22, compare
-the stats"): rerun the two commands and compare against the baseline above. Expect Fable
-sessions to open near 70K and Avg Cost/Day well under $40 for a comparable week; note that
-`--days 7` on 09-29 straddles the change, so prefer `--days 6` or compare per-session
-first-turn writes before/after 09-22. If spend is still dominated by Fable cache reads, the
-next lever is `sisyphus` → `anthropic/claude-sonnet-5` in `omo.jsonc` (orchestrator only;
-keep Fable on `prometheus`).
+Review, 2026-10-06 (`--days 14`, the two weeks after the 09-22 change): 79 sessions,
+$1,010.73, **$72.19/day**, Fable $986 (97.5%). First-turn context did drop as expected,
+but per-day spend went up because the weeks were busier (several 200–500 message review
+sessions, one at $165). Fable's bill broken down by token line: cache **write** 53.9M ×
+$12.50 = **$674**, cache read 826M × $0.25 = $207, output 2.1M × $50 = $105. So the
+cache-write price, not cache-read, is the number a model swap has to move — every
+tool-heavy turn appends ~15K tokens written at 50× the read price.
+
+Why the orchestrator carries 97%: the cheap-worker tiers in `omo.jsonc` almost never
+fire. In 14 days `task` ran 14 times (5 oracle, 4 librarian, 2 unspecified-high, 1 deep,
+zero explore/quick/visual-engineering) against 3,698 orchestrator turns; `edit`+`write`
+were 6.5% of tool calls; the top bash commands were `gh pr`, `sed -n`, `python3 -`,
+`grep -n`, `git show`, `git diff`, plus 445 Linear MCP calls. Roughly 85% of top-session
+spend was PR review, handoff/completion review, requirements and Linear status — work
+whose output is prose for the user and has to flow through the orchestrator's context
+anyway. That is the workload, not a bug: the Sisyphus prompt reserves delegate-by-default
+for implementation, and the rules ("no sub-processes on a review", "research goes straight
+to the URL", review output drafted for approval) point the same way. Forcing delegation
+on reviews would be lossy; making the orchestrator cheaper is the lever. Queries used:
+
+```bash
+# tool calls by name
+sqlite3 ~/.local/share/opencode/opencode.db "select json_extract(p.data,'\$.tool'), count(*) from part p join message m on m.id=p.message_id where json_extract(p.data,'\$.type')='tool' and m.time_created > (strftime('%s','now')-14*86400)*1000 group by 1 order by 2 desc;"
+# assistant turns and cost by agent + model (child sessions included)
+sqlite3 ~/.local/share/opencode/opencode.db "select json_extract(m.data,'\$.agent'), json_extract(m.data,'\$.modelID'), count(*), round(sum(json_extract(m.data,'\$.cost')),2) from message m where json_extract(m.data,'\$.role')='assistant' and m.time_created > (strftime('%s','now')-14*86400)*1000 group by 1,2 order by 3 desc;"
+# sessions by cost, with cache-write / cache-read in millions
+sqlite3 ~/.local/share/opencode/opencode.db "select substr(s.title,1,45), count(*), round(sum(json_extract(m.data,'\$.cost')),2), round(sum(json_extract(m.data,'\$.tokens.cache.write'))/1e6,1), round(sum(json_extract(m.data,'\$.tokens.cache.read'))/1e6,1) from session s join message m on m.session_id=s.id where json_extract(m.data,'\$.role')='assistant' and m.time_created > (strftime('%s','now')-14*86400)*1000 group by s.id order by 3 desc limit 12;"
+```
+
+Change on 2026-10-06, priced on the measured 14-day token mix (prices from
+`https://models.dev/api.json`, per 1M tokens in / out / cache-read / cache-write):
+
+| model | in/out | cache r/w | same workload | note |
+|---|---|---|---|---|
+| claude-fable-5-1 (before) | 10 / 50 | 0.25 / 12.50 | $986 | |
+| **claude-opus-5-5** (after) | 4 / 20 | 0.20 / 5.00 | **~$477** | released 09-22; same 1M ctx, same 2026-06 cutoff, same effort ladder |
+| claude-sonnet-5-5 | 2 / 10 | 0.20 / 2.50 | ~$321 | the next step down |
+| claude-opus-5 / opus-4-8 | 5 / 25 | 0.50 / 6.25 | ~$802 | trap: only Opus 5.5 has the cheap cache tier |
+| gpt-6.1-sol | 2 / 10 | 0.10 / 2.50 | ~$238 | |
+
+- `sisyphus` → `anthropic/claude-opus-5-5`, reasoning `medium` (was Fable 5.1). Opus
+  first rather than Sonnet because the orchestrator is doing the actual review work, so
+  its quality matters more than "orchestrator" implies. `model` in `opencode.jsonc`
+  tracks it so plain `build` sessions get the same price.
+- `gpt-5.6` → `openai/gpt-6.1-sol` on `hephaestus`, `metis`, `momus`,
+  `unspecified-low/high`. gpt-5.6's canonical id is `gpt-5.6-sol`; 6.1-sol is its
+  successor in the same family (released 09-29, "near-Astra performance at a lower
+  cost"), half the price, newer cutoff.
+- `claude-sonnet-5` → `claude-sonnet-5-5` on `librarian`, `atlas`, `multimodal-looker`,
+  `visual-engineering`, `artistry`, `writing`. Same price, released 09-28.
+- Unchanged: `prometheus` (Fable/max), `oracle` + `ultrabrain` + `deep` (gpt-6-astra/max),
+  `explore` + `quick` (haiku-4-5). Low volume (under $20 combined), exactly where the top
+  model belongs.
+- Deliberately not done: a "multi-file implementation goes to `hephaestus`" rule. Worth
+  maybe $50–70 per two weeks on this workload; revisit only if the stats after the swap
+  show implementation sessions dominating.
+
+Review on or after 2026-10-13 (ask: "we moved sisyphus to opus-5-5 on 10-06, compare the
+stats"): rerun `opencode stats --days 7 --models` and the per-session query. `--days 7`
+on 10-13 straddles the change, so prefer `--days 6`. Expect Avg Cost/Day near **$37** on
+comparable work, with `claude-opus-5-5` where Fable was. Then decide on quality, not
+just cost: if Opus feels fine and more saving is wanted, `sisyphus` →
+`anthropic/claude-sonnet-5-5` (another ~$150 per two weeks); if quality slipped, the
+first knob is `"reasoning": "high"` on Opus, not reverting to Fable.
 
 ## Add or tune a model
 
@@ -202,8 +259,8 @@ Linear API key on disk; use the OAuth MCP server.
 ~/.dotfiles/setup.sh --profile work      # links rules, skills, per-repo stubs; installs the org skill
 opencode auth login                      # Anthropic (platform API key)
 opencode auth login                      # OpenAI (platform API key)
-opencode models anthropic                # confirm claude-fable-5-1, claude-sonnet-5, claude-haiku-4-5
-opencode models openai                   # confirm gpt-5.6, gpt-6-astra; edit both .jsonc files if names differ
+opencode models anthropic                # confirm claude-opus-5-5, claude-fable-5-1, claude-sonnet-5-5, claude-haiku-4-5
+opencode models openai                   # confirm gpt-6.1-sol, gpt-6-astra; edit both .jsonc files if names differ
 cd <any work repo> && opencode
 ```
 
