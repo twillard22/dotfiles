@@ -19,8 +19,3 @@
   importing `@~/...`. Claude asks once per repo, "Allow external CLAUDE.md file
   imports?" Answer Yes; the approval is stored in `~/.claude.json`. Never use
   `CLAUDE.local.md`; it suppresses `AGENTS.md`.
-- `brew doctor`'s "unlinked kegs: ruby" warning is inconsequential. The keg is a
-  dependency-only install (`installed_on_request: false`) pulled in by `cocoapods`, whose
-  `pod` wrapper invokes Ruby by absolute Cellar path and works fine unlinked. Your actual
-  Ruby toolchain is mise's, which precedes `/opt/homebrew/bin` on PATH, so linking the keg
-  would neither help nor shadow anything. Leave it as-is; do not re-raise it.
