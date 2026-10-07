@@ -143,6 +143,7 @@ mkdir -p "$HOME/.config/ghostty/themes"
 symlink "$DOTFILES/ghostty/config" "$HOME/.config/ghostty/config"
 symlink "$DOTFILES/ghostty/themes/neon-sign" "$HOME/.config/ghostty/themes/neon-sign"
 symlink "$DOTFILES/ghostty/themes/neon-sign-muted" "$HOME/.config/ghostty/themes/neon-sign-muted"
+remove_dangling_links "$HOME/.config/ghostty/themes"
 
 # ── Aerospace ─────────────────────────────────────────────────────────────────
 echo "==> Linking Aerospace config..."
