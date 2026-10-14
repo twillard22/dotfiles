@@ -1,0 +1,86 @@
+diff --git a/Sources/AppBundle/tree/MacApp.swift b/Sources/AppBundle/tree/MacApp.swift
+index 22d9bde0..c7f726cf 100644
+--- a/Sources/AppBundle/tree/MacApp.swift
++++ b/Sources/AppBundle/tree/MacApp.swift
+@@ -35,7 +35,7 @@ final class MacApp: AbstractApp {
+     ) {
+         self.nsApp = nsApp
+         self.axApp = .init(axApp)
+-        self.pid = nsApp.processIdentifier
++        self.pid = nsApp.resolvedPid
+         self.rawAppBundleId = nsApp.bundleIdentifier
+         self.appId = nsApp.bundleIdentifier.flatMap { KnownBundleId.init(rawValue: $0) }
+         assert(!axSubscriptions.isEmpty)
+@@ -49,7 +49,7 @@ final class MacApp: AbstractApp {
+         // Don't perceive any of the lock screen windows as real windows
+         // Otherwise, false positive ax notifications might trigger that lead to gcWindows
+         if nsApp.bundleIdentifier == lockScreenAppBundleId { return nil }
+-        let pid = nsApp.processIdentifier
++        let pid = nsApp.resolvedPid
+         // AX requests crash if you send them to yourself
+         if pid == myPid { return nil }
+ 
+@@ -64,7 +64,7 @@ final class MacApp: AbstractApp {
+ 
+         let thread = Thread {
+             $axTaskLocalAppThreadToken.withValue(AxAppThreadToken(pid: pid, idForDebug: nsApp.idForDebug)) {
+-                let axApp = AXUIElementCreateApplication(nsApp.processIdentifier)
++                let axApp = AXUIElementCreateApplication(nsApp.resolvedPid)
+                 let handlers: HandlerToNotifKeyMapping = unsafe [
+                     (refreshObs, [kAXWindowCreatedNotification, kAXFocusedWindowChangedNotification]),
+                 ]
+@@ -267,8 +267,8 @@ final class MacApp: AbstractApp {
+         return try await withThrowingTaskGroup(of: (pid_t, [UInt32]).self, returning: [MacApp: [UInt32]].self) { group in
+             func refreshTheApp(_ nsApp: NSRunningApplication) {
+                 group.addTask { @Sendable @MainActor in
+-                    guard let app = try await MacApp.getOrRegister(nsApp) else { return (nsApp.processIdentifier, []) }
+-                    return (nsApp.processIdentifier, try await app.refreshAndGetAliveWindowIds(frontmostAppBundleId: frontmostAppBundleId))
++                    guard let app = try await MacApp.getOrRegister(nsApp) else { return (nsApp.resolvedPid, []) }
++                    return (nsApp.resolvedPid, try await app.refreshAndGetAliveWindowIds(frontmostAppBundleId: frontmostAppBundleId))
+                 }
+             }
+             // Register new apps
+diff --git a/Sources/AppBundle/util/AxSubscription.swift b/Sources/AppBundle/util/AxSubscription.swift
+index 658841dd..109afe6d 100644
+--- a/Sources/AppBundle/util/AxSubscription.swift
++++ b/Sources/AppBundle/util/AxSubscription.swift
+@@ -34,7 +34,7 @@ final class AxSubscription {
+         var visitedNotifKeys: Set<String> = []
+         for unsafe (handler, notifKeys) in unsafe handlerToNotifKeyMapping {
+             try job.checkCancellation()
+-            guard let obs = unsafe AXObserver.new(nsApp.processIdentifier, handler) else { return [] }
++            guard let obs = unsafe AXObserver.new(nsApp.resolvedPid, handler) else { return [] }
+             let subscription = AxSubscription(obs: obs, ax: ax)
+             for key: String in notifKeys {
+                 try job.checkCancellation()
+diff --git a/Sources/AppBundle/util/NSRunningApplicationEx.swift b/Sources/AppBundle/util/NSRunningApplicationEx.swift
+index 03be0ef3..decb584e 100644
+--- a/Sources/AppBundle/util/NSRunningApplicationEx.swift
++++ b/Sources/AppBundle/util/NSRunningApplicationEx.swift
+@@ -2,6 +2,25 @@ import AppKit
+ 
+ extension NSRunningApplication {
+     var idForDebug: String {
+-        "PID: \(processIdentifier) ID: \(bundleIdentifier ?? executableURL?.description ?? "")"
++        "PID: \(resolvedPid) ID: \(bundleIdentifier ?? executableURL?.description ?? "")"
++    }
++
++    // macOS 27: NSRunningApplication reports -1 for some apps (e.g. Xcode 27's Device Hub)
++    // although LaunchServices knows the real pid. Fall back to matching the executable path.
++    var resolvedPid: pid_t {
++        let pid = processIdentifier
++        if pid != -1 { return pid }
++        guard let path = executableURL?.path else { return pid }
++        var pids = [pid_t](repeating: 0, count: 8192)
++        let count = unsafe proc_listallpids(&pids, Int32(pids.count * MemoryLayout<pid_t>.size))
++        var buf = [CChar](repeating: 0, count: 4 * Int(MAXPATHLEN))
++        for candidate in pids.prefix(Int(max(count, 0))) where candidate > 0 {
++            if unsafe proc_pidpath(candidate, &buf, UInt32(buf.count)) > 0,
++               String(cString: buf) == path
++            {
++                return candidate
++            }
++        }
++        return pid
+     }
+ }
