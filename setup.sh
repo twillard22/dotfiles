@@ -97,9 +97,12 @@ mkdir -p "$HOME/.config/mise"
 symlink "$DOTFILES/mise/config.toml" "$HOME/.config/mise/config.toml"
 
 if ! skip_install; then
-  echo "==> Installing mise tools (node, bun, pnpm, ruby, yarn)..."
+  echo "==> Installing mise tools (node, bun, pnpm, ruby, yarn, opencode)..."
   mise trust "$DOTFILES/mise/config.toml"
   mise install
+  # mise installs npm: tools with install scripts disabled (even with npm.package_manager =
+  # "npm"), and opencode-ai's postinstall is what fetches the platform binary.
+  (cd "$(mise where npm:opencode-ai)/node_modules/opencode-ai" && mise exec -- node postinstall.mjs)
 fi
 
 # ── GPG ───────────────────────────────────────────────────────────────────────
