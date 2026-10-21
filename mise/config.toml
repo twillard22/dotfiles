@@ -1,6 +1,7 @@
 [tools]
 bun = "latest"
 node = "lts"
+"npm:opencode-ai" = "1.18.30"
 pnpm = "latest"
 ruby = "latest"
 yarn = "1.22.22"

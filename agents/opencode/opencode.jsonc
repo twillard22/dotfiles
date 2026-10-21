@@ -6,6 +6,11 @@
 
   "plugin": ["oh-my-openagent@latest"],
 
+  // Pinned to 1.18.30 via npm:opencode-ai in mise/config.toml (not Homebrew, not npm -g):
+  // oh-my-openagent doesn't load on OpenCode V2 yet, which breaks skill_mcp and omo
+  // routing. Re-enable after migrating.
+  "autoupdate": false,
+
   // Default model for plain sessions. oh-my-openagent's per-agent routing lives in
   // agents/opencode/omo.jsonc (symlinked to ~/.omo/omo.jsonc). Tracks `sisyphus` there.
   "model": "anthropic/claude-opus-5-5",
